@@ -19,12 +19,6 @@
 
 ---
 
-### Important: EAC Ban Risk Disclaimer
-
-**RustOptimizer**, like other unsigned applications, is not officially approved by Easy Anti-Cheat (EAC). There is a possibility that using this application could result in an EAC ban. Your use of this application is at your own risk.
-
----
-
 ### How to Use
 
 1.  **Download:** Get the latest version of RustOptimizer from the GitHub releases page.
