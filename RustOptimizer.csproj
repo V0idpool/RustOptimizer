@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>ROIcon.ico</ApplicationIcon>
+    <PackageIcon>ROIcon.ico</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="client.cfg" />
+    <None Remove="UserCFG.ini" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ROIcon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="client.cfg" />
+    <EmbeddedResource Include="UserCFG.ini" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="GUI\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\Pictures\ROIcon.ico">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="9.0.9" />
+  </ItemGroup>
+
+</Project>
