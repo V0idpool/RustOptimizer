@@ -20,7 +20,7 @@
 ---
 
 ### How to Use
-**(Use SAVE BACKUP, to make a back-up of your settings to ensure you can revert back to your settings)**
+## **(Use SAVE BACKUP, to make a back-up of your settings to ensure you can revert back to your settings)**
 1.  **Download:** Get the latest version of RustOptimizer from the GitHub releases page.
 2.  **Run the application.**
 3.  **Set Game Path:** Click "**Open...**" and select your main Rust game directory (e.g., `C:\Program Files (x86)\Steam\steamapps\common\Rust`).
