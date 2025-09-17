@@ -12,6 +12,7 @@
     * **Balanced (Good Performance & Looks):** A great mix of graphical fidelity and performance.
     * **Recommended (Optimized):** The ideal settings for your specific hardware.
     * **Ultra (Maximum Visuals):** Pushes graphics to the limit for a stunning experience.
+* **Import & Export Custom Profiles:** Save your current game settings to a shareable file (.rop) or import a profile from a friend to use their setup.
 * **Easy Configuration:** Select your game folder and apply your chosen profile with a single button click.
 * **Backup & Restore:** Create backups of your current `client.cfg` file before making changes, so you can easily revert to your original settings at any time. You can also manually restore backups or load the default settings.
 * **User-Friendly Interface:** The simple and intuitive interface makes it easy for anyone to optimize their game without needing to manually edit configuration files.
@@ -20,7 +21,9 @@
 ---
 
 ### How to Use
+
 ## **(Use SAVE BACKUP, to make a back-up of your settings to ensure you can revert back to your settings)**
+
 1.  **Download:** Get the latest version of RustOptimizer from the GitHub releases page.
 2.  **Run the application.**
 3.  **Set Game Path:** Click "**Open...**" and select your main Rust game directory (e.g., `C:\Program Files (x86)\Steam\steamapps\common\Rust`).
