@@ -62,6 +62,8 @@
             restoreBackupBtn = new GUI.NSButton();
             nsLabel6 = new GUI.NSLabel();
             backupDropdown = new GUI.NSComboBox();
+            importProfileToolStripMenuItem = new ToolStripMenuItem();
+            exportProfileToolStripMenuItem = new ToolStripMenuItem();
             nsGroupBox1.SuspendLayout();
             nsGroupBox2.SuspendLayout();
             nsGroupBox3.SuspendLayout();
@@ -271,7 +273,7 @@
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { backUpLocationToolStripMenuItem, exitToolStripMenuItem, restoreBackupToolStripMenuItem, defaultSettingsToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem1 });
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { backUpLocationToolStripMenuItem, exitToolStripMenuItem, restoreBackupToolStripMenuItem, defaultSettingsToolStripMenuItem, exportProfileToolStripMenuItem, importProfileToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem1 });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new Size(37, 20);
             fileToolStripMenuItem.Text = "File";
@@ -279,40 +281,40 @@
             // backUpLocationToolStripMenuItem
             // 
             backUpLocationToolStripMenuItem.Name = "backUpLocationToolStripMenuItem";
-            backUpLocationToolStripMenuItem.Size = new Size(164, 22);
+            backUpLocationToolStripMenuItem.Size = new Size(180, 22);
             backUpLocationToolStripMenuItem.Text = "Back-ups Path...";
             backUpLocationToolStripMenuItem.Click += backUpLocationToolStripMenuItem_Click;
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(164, 22);
+            exitToolStripMenuItem.Size = new Size(180, 22);
             exitToolStripMenuItem.Text = "Save Back-up...";
             exitToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
             // restoreBackupToolStripMenuItem
             // 
             restoreBackupToolStripMenuItem.Name = "restoreBackupToolStripMenuItem";
-            restoreBackupToolStripMenuItem.Size = new Size(164, 22);
+            restoreBackupToolStripMenuItem.Size = new Size(180, 22);
             restoreBackupToolStripMenuItem.Text = "Restore Backup...";
             restoreBackupToolStripMenuItem.Click += restoreBackupToolStripMenuItem_Click;
             // 
             // defaultSettingsToolStripMenuItem
             // 
             defaultSettingsToolStripMenuItem.Name = "defaultSettingsToolStripMenuItem";
-            defaultSettingsToolStripMenuItem.Size = new Size(164, 22);
+            defaultSettingsToolStripMenuItem.Size = new Size(180, 22);
             defaultSettingsToolStripMenuItem.Text = "Load Defaults...";
             defaultSettingsToolStripMenuItem.Click += defaultSettingsToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(161, 6);
+            toolStripSeparator1.Size = new Size(177, 6);
             // 
             // exitToolStripMenuItem1
             // 
             exitToolStripMenuItem1.Name = "exitToolStripMenuItem1";
-            exitToolStripMenuItem1.Size = new Size(164, 22);
+            exitToolStripMenuItem1.Size = new Size(180, 22);
             exitToolStripMenuItem1.Text = "Exit";
             exitToolStripMenuItem1.Click += exitToolStripMenuItem1_Click;
             // 
@@ -393,6 +395,20 @@
             backupDropdown.Size = new Size(217, 24);
             backupDropdown.TabIndex = 0;
             // 
+            // importProfileToolStripMenuItem
+            // 
+            importProfileToolStripMenuItem.Name = "importProfileToolStripMenuItem";
+            importProfileToolStripMenuItem.Size = new Size(180, 22);
+            importProfileToolStripMenuItem.Text = "Import Profile...";
+            importProfileToolStripMenuItem.Click += importProfileToolStripMenuItem_Click;
+            // 
+            // exportProfileToolStripMenuItem
+            // 
+            exportProfileToolStripMenuItem.Name = "exportProfileToolStripMenuItem";
+            exportProfileToolStripMenuItem.Size = new Size(180, 22);
+            exportProfileToolStripMenuItem.Text = "Export Profile...";
+            exportProfileToolStripMenuItem.Click += exportProfileToolStripMenuItem_Click;
+            // 
             // MainFrm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -458,5 +474,7 @@
         private ToolStripMenuItem exitToolStripMenuItem1;
         private ToolStripMenuItem restoreBackupToolStripMenuItem;
         private GUI.NSButton autoDetectBtn;
+        private ToolStripMenuItem exportProfileToolStripMenuItem;
+        private ToolStripMenuItem importProfileToolStripMenuItem;
     }
 }

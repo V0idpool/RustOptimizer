@@ -347,14 +347,15 @@ namespace RustOptimizer
                 });
             }
         }
-
+        /// <summary>
+        /// Analyzes the user's hardware (CPU, GPU, and RAM) and recommends the most suitable optimization profile from the dropdown menu for the best performance.
+        /// </summary>
         private void autoDetectBtn_Click(object sender, EventArgs e)
         {
             string recommendedProfile = RecommendProfile();
             profileDropdown.SelectedItem = recommendedProfile;
             MessageBox.Show($"Based on your hardware, we recommend the '{recommendedProfile}' profile for the best experience.", "Profile Recommendation", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-
         private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             string titleAbout = "About RustOptimizer";
@@ -383,6 +384,73 @@ namespace RustOptimizer
             {
                 aboutForm.nsGroupBox1.Title = titleAbout;
                 aboutForm.ShowDialog();
+            }
+        }
+        /// <summary>
+        /// Save your current game settings to a file that can be shared. The file gets saved as a .rop file, making it easy to send to your friends.
+        /// </summary>
+        private void exportProfileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(GameConfigPath))
+            {
+                MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            using (var sfd = new SaveFileDialog())
+            {
+                sfd.Filter = "Rust Optimizer Profile (*.rop)|*.rop";
+                sfd.Title = "Export a Rust Optimizer Profile";
+                sfd.FileName = "my_custom_profile.rop";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        File.Copy(GameConfigPath, sfd.FileName, true);
+                        MessageBox.Show("Profile exported successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"An error occurred while exporting the profile: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Import someone else's .rop profile settings into your game, and offers the option to save it as a backup.
+        /// </summary>
+        private void importProfileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(gamePathString.Text) || !Directory.Exists(gamePathString.Text))
+            {
+                MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            using (var ofd = new OpenFileDialog())
+            {
+                ofd.Filter = "Rust Optimizer Profile (*.rop)|*.rop";
+                ofd.Title = "Import a Rust Optimizer Profile";
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        File.Copy(ofd.FileName, GameConfigPath, true);
+                        MessageBox.Show("Profile imported successfully! Restart your game for changes to take effect.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        var result = MessageBox.Show("Would you like to save this imported profile as a new backup?", "Save as Backup", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (result == DialogResult.Yes)
+                        {
+                            saveBackupBtn_Click(sender, e);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"An error occurred while importing the profile: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
     }
