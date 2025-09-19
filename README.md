@@ -1,4 +1,5 @@
 # RustOptimizer
+<img width="999" height="514" alt="unnamed" src="https://github.com/user-attachments/assets/83beac24-7023-4642-9e07-530a14b6aeb8" />
 
 **RustOptimizer** is a simple, easy-to-use tool designed to help you optimize your Rust game settings for the best possible performance. Whether you're aiming for maximum frames per second (FPS) or a balance of visuals and speed, RustOptimizer helps you get your game running smoothly with just a few clicks.
 
