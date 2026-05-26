@@ -50,7 +50,6 @@ namespace RustOptimizer.Helpers
 
             try
             {
-                // Open the Display Adapters registry key
                 using (RegistryKey classKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"))
                 {
                     if (classKey != null)
@@ -63,7 +62,6 @@ namespace RustOptimizer.Helpers
                                 {
                                     if (adapterKey != null)
                                     {
-                                        // Check both 64-bit and 32-bit memory keys
                                         object memObj = adapterKey.GetValue("HardwareInformation.qwMemorySize")
                                                      ?? adapterKey.GetValue("HardwareInformation.MemorySize");
 
@@ -73,13 +71,11 @@ namespace RustOptimizer.Helpers
                                         {
                                             long vramBytes = Convert.ToInt64(memObj);
 
-                                            // Handle potential negative values if stored as signed 32-bit
                                             if (vramBytes < 0)
                                             {
                                                 vramBytes = (long)(uint)Convert.ToInt32(memObj);
                                             }
 
-                                            // If this adapter has more VRAM, it's the dedicated GPU. Save its name.
                                             if (vramBytes >= maxVramBytes)
                                             {
                                                 maxVramBytes = vramBytes;
@@ -98,7 +94,6 @@ namespace RustOptimizer.Helpers
                 Console.WriteLine($"Error getting GPU Name from registry: {ex.Message}");
             }
 
-            // Direct fallback to WMI if the registry doesn't return anything valid
             if (bestGpuName == "N/A")
             {
                 try
@@ -144,21 +139,18 @@ namespace RustOptimizer.Helpers
                 string manufacturer = obj["Manufacturer"]?.ToString().Trim() ?? "Unknown";
                 string partNumber = obj["PartNumber"]?.ToString().Trim() ?? "";
 
-                // First, try to infer the RAM type directly from the part number
                 string ramTypeFromPartNumber = GetRamTypeFromPartNumber(partNumber);
                 if (!string.IsNullOrEmpty(ramTypeFromPartNumber))
                 {
                     return $"{manufacturer} {ramTypeFromPartNumber} {partNumber}";
                 }
 
-                // If part number parsing fails, fall back to SMBIOSMemoryType
                 if (obj["SMBIOSMemoryType"] != null && Convert.ToInt32(obj["SMBIOSMemoryType"]) != 0)
                 {
                     int smbiosMemoryType = Convert.ToInt32(obj["SMBIOSMemoryType"]);
                     return $"{manufacturer} {GetSMBIOSRamTypeString(smbiosMemoryType)} {partNumber}";
                 }
 
-                // If SMBIOSMemoryType is unavailable, fall back to MemoryType
                 if (obj["MemoryType"] != null)
                 {
                     int memoryType = Convert.ToInt32(obj["MemoryType"]);
@@ -262,7 +254,6 @@ namespace RustOptimizer.Helpers
                                 {
                                     if (adapterKey != null)
                                     {
-                                        // Check for 64-bit QWORD first, then fallback to 32-bit DWORD
                                         object memObj = adapterKey.GetValue("HardwareInformation.qwMemorySize")
                                                      ?? adapterKey.GetValue("HardwareInformation.MemorySize");
 
@@ -270,7 +261,6 @@ namespace RustOptimizer.Helpers
                                         {
                                             long vramBytes = Convert.ToInt64(memObj);
 
-                                            // Fix for 32-bit unsigned integers being incorrectly cast as negative signed longs
                                             if (vramBytes < 0)
                                             {
                                                 vramBytes = (long)(uint)Convert.ToInt32(memObj);
