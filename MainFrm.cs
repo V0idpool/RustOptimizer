@@ -7,17 +7,23 @@ namespace RustOptimizer
 {
     public partial class MainFrm : Form
     {
+        public static MainFrm Instance { get; private set; }
         public static string ConfigPath { get; private set; } = Path.Combine(Application.StartupPath, "User", "UserCFG.ini");
         private string BackupsPath { get; set; } = Path.Combine(Application.StartupPath, "backups");
         private string GameConfigPath => Path.Combine(gamePathString.Text, "cfg", "client.cfg");
         private RustConfig rustConfig = new RustConfig();
+        public System.Windows.Forms.Timer autoFlushTimer;
         public MainFrm()
         {
             InitializeComponent();
+            Instance = this;
         }
 
         private void MainFrm_Load(object sender, EventArgs e)
         {
+            System.Version currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            string versionString = currentVersion.Major.ToString() + "." + currentVersion.Minor.ToString();
+            MainFrm.Instance.Text = $"Rust Optimizer v{versionString}";
             var ini = new RustOptimizer.Helpers.inisettings { Path = ConfigPath };
             string directory = Path.GetDirectoryName(ConfigPath);
 
@@ -54,6 +60,70 @@ namespace RustOptimizer
                 profileDropdown.SelectedItem = recommendedProfile;
                 MessageBox.Show($"Based on your hardware, we recommend the '{recommendedProfile}' profile for the best experience.", "Profile Recommendation", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+            string intervalStr = ini.ReadValue("AppSettings", "FlushInterval");
+            string unitStr = ini.ReadValue("AppSettings", "FlushUnit");
+            if (int.TryParse(intervalStr, NumberStyles.Any, CultureInfo.InvariantCulture, out int savedInterval) && savedInterval > 0)
+            {
+                autoFlushinterval.Value = savedInterval;
+            }
+            else
+            {
+                autoFlushinterval.Value = 15;
+            }
+            if (!string.IsNullOrEmpty(unitStr) && (unitStr.Equals("Minutes", StringComparison.OrdinalIgnoreCase) || unitStr.Equals("Hours", StringComparison.OrdinalIgnoreCase)))
+            {
+                autoFlushMinHour.Text = unitStr;
+            }
+            else
+            {
+                autoFlushMinHour.Text = "Minutes";
+            }
+
+            string autoFlushStr = ini.ReadValue("AppSettings", "AutoFlush");
+            autoFlushChk.Checked = !string.IsNullOrEmpty(autoFlushStr) && autoFlushStr.Equals("True", StringComparison.OrdinalIgnoreCase);
+
+            string flushSoundStr = ini.ReadValue("AppSettings", "FlushSound");
+            autoFlushSound.Checked = !string.IsNullOrEmpty(flushSoundStr) && flushSoundStr.Equals("True", StringComparison.OrdinalIgnoreCase);
+            if (autoFlushChk.Checked && !Optimizer.IsAdministrator())
+            {
+                autoFlushChk.Checked = false;
+
+                ini.WriteValue("AppSettings", "AutoFlush", "False", ini.Path);
+
+                DialogResult result = MessageBox.Show(
+             "Auto Flush requires Rust Optimizer to be run as Administrator.\n\nWould you like to restart the application as Administrator now?",
+             "Administrator Required",
+             MessageBoxButtons.OKCancel,
+             MessageBoxIcon.Warning
+         );
+
+                if (result == DialogResult.OK)
+                {
+                    ini.WriteValue("AppSettings", "AutoFlush", "True", ini.Path);
+                    autoFlushChk.Checked = true;
+                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    {
+                        UseShellExecute = true,
+                        WorkingDirectory = Application.StartupPath,
+                        FileName = Application.ExecutablePath,
+                        Verb = "runas"
+                    };
+
+                    try
+                    {
+                        Process.Start(startInfo);
+                        Application.Exit();
+                        return;
+                    }
+                    catch (System.ComponentModel.Win32Exception)
+                    {
+                        ini.WriteValue("AppSettings", "AutoFlush", "False", ini.Path);
+                        autoFlushChk.Checked = false;
+                        MessageBox.Show("Restart canceled. Rust Optimizer will run in standard user mode without Auto Flush features.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                }
+            Optimizer.InitializeAutoFlushTimer();
             lblCPUInfo.Text = string.Format("{0} ({1} GHz)", Helpers.HardwareDetector.GetCpuName(), Helpers.HardwareDetector.GetCpuSpeedInGhz());
             lblGPUInfo.Text = $"{HardwareDetector.GetGpuName()} ({HardwareDetector.GetGpuVramInGB():F0}GB VRAM)";
             lblRAMInfo.Text = $"{HardwareDetector.GetRamInfo()} ({HardwareDetector.GetTotalMemoryInGB():F0} GB)";
@@ -330,7 +400,7 @@ namespace RustOptimizer
         /// </summary>
         private void supportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string supportURL = "https://discord.gg/R4bR9JwAfv";
+            string supportURL = "https://discord.gg/tfwf9Qr7rG";
 
             DialogResult result = MessageBox.Show(
                 "To receive direct support and connect with our community, you can join our Discord server. Click OK to open the invitation link.",
@@ -372,12 +442,13 @@ namespace RustOptimizer
 
                 @"\b\fs24 Useful Links:\b0\par " +
                 @"\fs20\cf2 " +
-                @"\b\fs24 • Download:\b0\par " +
-                @"\fs20\hlink https://github.com/V0idpool/RustOptimizer\par\par " +
+                @"\b\fs24 • Downloads:\b0\par " +
+                @"\fs20\hlink https://github.com/V0idpool/RustOptimizer\par " +
+                @"\fs20\hlink https://www.nexusmods.com/rust/mods/5\par\par " +
                 @"\b\fs24 • Donations:\b0\par " +
                 @"\fs20\hlink https://buymeacoffee.com/rustforgedev\par\par " +
                 @"\b\fs24 • Support:\b0\par " +
-                @"\fs20\hlink https://discord.gg/R4bR9JwAfv\par\par " +
+                @"\fs20\hlink https://discord.gg/tfwf9Qr7rG\par\par " +
                 @"}";
 
             using (About aboutForm = new About(rtfMessage))
@@ -452,6 +523,75 @@ namespace RustOptimizer
                     }
                 }
             }
+        }
+
+        private void flushRamToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Optimizer.FlushStandbyList(false);
+        }
+
+        private void saveAdvancedCfgBtn_Click(object sender, EventArgs e)
+        {
+            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
+            ini.WriteValue("AppSettings", "AutoFlush", autoFlushChk.Checked.ToString(), ini.Path);
+            ini.WriteValue("AppSettings", "FlushInterval", autoFlushinterval.Value.ToString(CultureInfo.InvariantCulture), ini.Path);
+            ini.WriteValue("AppSettings", "FlushUnit", autoFlushMinHour.Text, ini.Path);
+            ini.WriteValue("AppSettings", "FlushSound", autoFlushSound.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
+            Optimizer.InitializeAutoFlushTimer();
+            MessageBox.Show("Advanced Config Saved!", "Rust Optimizer", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string site = "https://buymeacoffee.com/rustforgedev";
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = site,
+                UseShellExecute = true
+            });
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string site = "https://rustforge.us/";
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = site,
+                UseShellExecute = true
+            });
+        }
+
+        private void autoFlushSound_CheckedChanged(object sender)
+        {
+            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
+            ini.WriteValue("AppSettings", "FlushSound", autoFlushSound.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
+        }
+
+        private void autoFlushChk_CheckedChanged(object sender)
+        {
+            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
+            ini.WriteValue("AppSettings", "AutoFlush", autoFlushChk.Checked.ToString(), ini.Path);
+        }
+
+        private void autoFlushinterval_ValueChanged(object sender, EventArgs e)
+        {
+            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
+            ini.WriteValue("AppSettings", "FlushInterval", autoFlushinterval.Value.ToString(CultureInfo.InvariantCulture), ini.Path);
+        }
+
+        private void donateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string site = "https://buymeacoffee.com/rustforgedev";
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = site,
+                UseShellExecute = true
+            });
         }
     }
 }
