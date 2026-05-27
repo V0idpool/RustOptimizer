@@ -8,7 +8,7 @@ namespace RustOptimizer
     public partial class MainFrm : Form
     {
         public static MainFrm Instance { get; private set; }
-        public static string ConfigPath { get; private set; } = Path.Combine(Application.StartupPath, "User", "UserCFG.ini");
+        public static string ConfigPath { get; private set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Rust Optimizer", "User", "UserCFG.ini");
         private string BackupsPath { get; set; } = Path.Combine(Application.StartupPath, "backups");
         private string GameConfigPath => Path.Combine(gamePathString.Text, "cfg", "client.cfg");
         private RustConfig rustConfig = new RustConfig();
@@ -442,12 +442,12 @@ namespace RustOptimizer
 
                 @"\b\fs24 Useful Links:\b0\par " +
                 @"\fs20\cf2 " +
-                @"\b\fs24 • Downloads:\b0\par " +
+                @"\b\fs24 Â• Downloads:\b0\par " +
                 @"\fs20\hlink https://github.com/V0idpool/RustOptimizer\par " +
                 @"\fs20\hlink https://www.nexusmods.com/rust/mods/5\par\par " +
-                @"\b\fs24 • Donations:\b0\par " +
+                @"\b\fs24 Â• Donations:\b0\par " +
                 @"\fs20\hlink https://buymeacoffee.com/rustforgedev\par\par " +
-                @"\b\fs24 • Support:\b0\par " +
+                @"\b\fs24 Â• Support:\b0\par " +
                 @"\fs20\hlink https://discord.gg/tfwf9Qr7rG\par\par " +
                 @"}";
 
