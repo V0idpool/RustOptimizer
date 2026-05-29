@@ -13,6 +13,7 @@ namespace RustOptimizer
         private string GameConfigPath => Path.Combine(gamePathString.Text, "cfg", "client.cfg");
         private RustConfig rustConfig = new RustConfig();
         public System.Windows.Forms.Timer autoFlushTimer;
+        public NotifyIcon sysTrayIcon;
         public MainFrm()
         {
             InitializeComponent();
@@ -60,16 +61,10 @@ namespace RustOptimizer
                 profileDropdown.SelectedItem = recommendedProfile;
                 MessageBox.Show($"Based on your hardware, we recommend the '{recommendedProfile}' profile for the best experience.", "Profile Recommendation", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            string intervalStr = ini.ReadValue("AppSettings", "FlushInterval");
+            int interval = ini.GetInteger("AppSettings", "FlushInterval", 15);
             string unitStr = ini.ReadValue("AppSettings", "FlushUnit");
-            if (int.TryParse(intervalStr, NumberStyles.Any, CultureInfo.InvariantCulture, out int savedInterval) && savedInterval > 0)
-            {
-                autoFlushinterval.Value = savedInterval;
-            }
-            else
-            {
-                autoFlushinterval.Value = 15;
-            }
+            autoFlushinterval.Value = interval;
+
             if (!string.IsNullOrEmpty(unitStr) && (unitStr.Equals("Minutes", StringComparison.OrdinalIgnoreCase) || unitStr.Equals("Hours", StringComparison.OrdinalIgnoreCase)))
             {
                 autoFlushMinHour.Text = unitStr;
@@ -79,11 +74,15 @@ namespace RustOptimizer
                 autoFlushMinHour.Text = "Minutes";
             }
 
-            string autoFlushStr = ini.ReadValue("AppSettings", "AutoFlush");
-            autoFlushChk.Checked = !string.IsNullOrEmpty(autoFlushStr) && autoFlushStr.Equals("True", StringComparison.OrdinalIgnoreCase);
+            bool autoFlush = ini.GetBoolean("AppSettings", "AutoFlush", false);
+            autoFlushChk.Checked = autoFlush;
 
-            string flushSoundStr = ini.ReadValue("AppSettings", "FlushSound");
-            autoFlushSound.Checked = !string.IsNullOrEmpty(flushSoundStr) && flushSoundStr.Equals("True", StringComparison.OrdinalIgnoreCase);
+
+            bool cpuHighPriority = ini.GetBoolean("AppSettings", "CPUHighPriority", false);
+            highPriority.Checked = cpuHighPriority;
+            Optimizer.SetPriority(cpuHighPriority);
+            bool flushSound = ini.GetBoolean("AppSettings", "FlushSound", false);
+            autoFlushSound.Checked = flushSound;
             if (autoFlushChk.Checked && !Optimizer.IsAdministrator())
             {
                 autoFlushChk.Checked = false;
@@ -122,12 +121,31 @@ namespace RustOptimizer
                         MessageBox.Show("Restart canceled. Rust Optimizer will run in standard user mode without Auto Flush features.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
-                }
+            }
             Optimizer.InitializeAutoFlushTimer();
             lblCPUInfo.Text = string.Format("{0} ({1} GHz)", Helpers.HardwareDetector.GetCpuName(), Helpers.HardwareDetector.GetCpuSpeedInGhz());
             lblGPUInfo.Text = $"{HardwareDetector.GetGpuName()} ({HardwareDetector.GetGpuVramInGB():F0}GB VRAM)";
             lblRAMInfo.Text = $"{HardwareDetector.GetRamInfo()} ({HardwareDetector.GetTotalMemoryInGB():F0} GB)";
             LoadBackups();
+
+            ContextMenuStrip trayMenu = new ContextMenuStrip();
+            trayMenu.Items.Add("Launch Rust...", null, (s, args) => TrayHandler.LaunchRust());
+            trayMenu.Items.Add("Open", null, (s, args) => TrayHandler.ShowFormFromTray());
+            trayMenu.Items.Add("Exit", null, (s, args) =>
+            {
+                sysTrayIcon.Visible = false;
+                Application.Exit();
+            });
+
+            sysTrayIcon = new NotifyIcon
+            {
+                Icon = this.Icon,
+                Text = "Rust Optimizer",
+                ContextMenuStrip = trayMenu,
+                Visible = false
+            };
+
+            sysTrayIcon.DoubleClick += (s, args) => TrayHandler.ShowFormFromTray();
         }
         /// <summary>
         /// Grabs all the backup folders and adds them to the dropdown menu.
@@ -175,6 +193,7 @@ namespace RustOptimizer
         /// </summary>
         private void gamePathSelectBtn_Click(object sender, EventArgs e)
         {
+            var ini = new inisettings { Path = ConfigPath };
             using (var fbd = new FolderBrowserDialog())
             {
                 DialogResult result = fbd.ShowDialog();
@@ -182,19 +201,11 @@ namespace RustOptimizer
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
                 {
                     gamePathString.Text = fbd.SelectedPath;
+                    ini.WriteValue("AppSettings", "GamePath", fbd.SelectedPath, ini.Path);
                 }
             }
         }
-        /// <summary>
-        /// This button saves the user's settings, like the game path and profile, to the INI file.
-        /// </summary>
-        private void saveBtn_Click(object sender, EventArgs e)
-        {
-            var ini = new RustOptimizer.Helpers.inisettings { Path = ConfigPath };
-            ini.WriteValue("AppSettings", "GamePath", gamePathString.Text, ini.Path);
-            ini.WriteValue("AppSettings", "Profile", profileDropdown.Text, ini.Path);
-            MessageBox.Show("Settings Saved!");
-        }
+
         /// <summary>
         /// Just a simple function to close the application.
         /// </summary>
@@ -325,6 +336,7 @@ namespace RustOptimizer
                     }
                     catch (Exception ex)
                     {
+                        ExceptionHandler.LogError(ex);
                         MessageBox.Show($"An error occurred while restoring the backup: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -392,6 +404,7 @@ namespace RustOptimizer
             }
             catch (Exception ex)
             {
+                ExceptionHandler.LogError(ex);
                 MessageBox.Show($"An error occurred while restoring default settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -442,12 +455,12 @@ namespace RustOptimizer
 
                 @"\b\fs24 Useful Links:\b0\par " +
                 @"\fs20\cf2 " +
-                @"\b\fs24 Â• Downloads:\b0\par " +
+                @"\b\fs24 • Downloads:\b0\par " +
                 @"\fs20\hlink https://github.com/V0idpool/RustOptimizer\par " +
                 @"\fs20\hlink https://www.nexusmods.com/rust/mods/5\par\par " +
-                @"\b\fs24 Â• Donations:\b0\par " +
+                @"\b\fs24 • Donations:\b0\par " +
                 @"\fs20\hlink https://buymeacoffee.com/rustforgedev\par\par " +
-                @"\b\fs24 Â• Support:\b0\par " +
+                @"\b\fs24 • Support:\b0\par " +
                 @"\fs20\hlink https://discord.gg/tfwf9Qr7rG\par\par " +
                 @"}";
 
@@ -483,6 +496,7 @@ namespace RustOptimizer
                     }
                     catch (Exception ex)
                     {
+                        ExceptionHandler.LogError(ex);
                         MessageBox.Show($"An error occurred while exporting the profile: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -519,6 +533,7 @@ namespace RustOptimizer
                     }
                     catch (Exception ex)
                     {
+                        ExceptionHandler.LogError(ex);
                         MessageBox.Show($"An error occurred while importing the profile: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -533,12 +548,18 @@ namespace RustOptimizer
         private void saveAdvancedCfgBtn_Click(object sender, EventArgs e)
         {
             var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
+
+            ini.WriteValue("AppSettings", "GamePath", gamePathString.Text, ini.Path);
+            ini.WriteValue("AppSettings", "Profile", profileDropdown.Text, ini.Path);
             ini.WriteValue("AppSettings", "AutoFlush", autoFlushChk.Checked.ToString(), ini.Path);
             ini.WriteValue("AppSettings", "FlushInterval", autoFlushinterval.Value.ToString(CultureInfo.InvariantCulture), ini.Path);
             ini.WriteValue("AppSettings", "FlushUnit", autoFlushMinHour.Text, ini.Path);
             ini.WriteValue("AppSettings", "FlushSound", autoFlushSound.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
+            ini.WriteValue("AppSettings", "CPUHighPriority", highPriority.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
+
             Optimizer.InitializeAutoFlushTimer();
-            MessageBox.Show("Advanced Config Saved!", "Rust Optimizer", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Optimizer.SetPriority(highPriority.Checked);
+            MessageBox.Show("Settings Saved!", "Rust Optimizer", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -592,6 +613,83 @@ namespace RustOptimizer
                 FileName = site,
                 UseShellExecute = true
             });
+        }
+
+        private void minimizeToTrayToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TrayHandler.HideFormToTray();
+        }
+
+        private void launchRustBtn_Click(object sender, EventArgs e)
+        {
+            TrayHandler.LaunchRust();
+        }
+
+        private void openLogFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string logFilePath = ExceptionHandler.GetLogFilePath();
+
+                if (System.IO.File.Exists(logFilePath))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(logFilePath)
+                    {
+                        UseShellExecute = true
+                    });
+                }
+                else
+                {
+                    string logDirectory = System.IO.Path.GetDirectoryName(logFilePath);
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(logDirectory)
+                    {
+                        UseShellExecute = true
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogMessage($"Could not open log file: {ex.Message}");
+                MessageBox.Show($"Could not open log file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void openLogFilePathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string logFilePath = ExceptionHandler.GetLogFilePath();
+                string logDirectory = System.IO.Path.GetDirectoryName(logFilePath);
+
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(logDirectory)
+                {
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogMessage($"Could not open log file path: {ex.Message}");
+                MessageBox.Show($"Could not open log file path: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void openSettingsFilePathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string settingsFilePath = ConfigPath;
+                string settingsDirectory = System.IO.Path.GetDirectoryName(settingsFilePath);
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(settingsDirectory)
+                {
+                    UseShellExecute = true
+                });
+            }
+
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogMessage($"Could not open settings file path: {ex.Message}");
+                MessageBox.Show($"Could not open settings file path: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

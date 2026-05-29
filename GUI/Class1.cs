@@ -1046,7 +1046,7 @@ namespace RustOptimizer.GUI
         {
             if (e.Control is TabPage)
             {
-                e.Control.BackColor = Color.FromArgb(50, 50, 50);
+                e.Control.BackColor = Color.FromArgb(0, 0, 0);
             }
 
             base.OnControlAdded(e);

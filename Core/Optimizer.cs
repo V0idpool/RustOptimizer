@@ -162,8 +162,8 @@ namespace RustOptimizer.Core
             try
             {
                 var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
-                string soundStr = ini.ReadValue("AppSettings", "FlushSound");
-                bool playSound = !string.IsNullOrEmpty(soundStr) && soundStr.Equals("True", StringComparison.OrdinalIgnoreCase);
+               
+                bool playSound = ini.GetBoolean("AppSettings", "FlushSound", false);
 
                 if (!playSound) return;
 
@@ -189,6 +189,7 @@ namespace RustOptimizer.Core
             catch (Exception ex)
             {
                 Console.WriteLine($"Error playing sound: {ex.Message}");
+                ExceptionHandler.LogError(ex);
             }
         }
         /// <summary>
@@ -290,6 +291,7 @@ namespace RustOptimizer.Core
             catch (Exception ex)
             {
                 Console.WriteLine($"Error clearing Standby List: {ex.Message}");
+                ExceptionHandler.LogError(ex);
             }
         }
         public static void InitializeAutoFlushTimer()
@@ -302,9 +304,7 @@ namespace RustOptimizer.Core
             }
 
             var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
-
-            string autoFlushStr = ini.ReadValue("AppSettings", "AutoFlush");
-            bool isAutoFlushEnabled = !string.IsNullOrEmpty(autoFlushStr) && autoFlushStr.Equals("True", StringComparison.OrdinalIgnoreCase);
+            bool isAutoFlushEnabled = ini.GetBoolean("AppSettings", "AutoFlush", false);
 
             if (!isAutoFlushEnabled)
             {
@@ -336,6 +336,25 @@ namespace RustOptimizer.Core
         private static void AutoFlushTimer_Tick(object sender, EventArgs e)
         {
            FlushStandbyList(isAutoFlush: true);
+        }
+        /// <summary>
+        /// Set Rusts processor priority to high for performance gains.
+        /// </summary>
+        public static void SetPriority(bool high)
+        {
+            try
+            {
+                Process[] rustProcesses = Process.GetProcessesByName("RustClient");
+
+                foreach (Process p in rustProcesses)
+                {
+                    p.PriorityClass = high ? ProcessPriorityClass.High : ProcessPriorityClass.Normal;
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogError(ex);
+            }
         }
     }
 }

@@ -30,9 +30,9 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainFrm));
             nsGroupBox1 = new GUI.NSGroupBox();
+            launchRustBtn = new GUI.NSButton();
             nsLabel1 = new GUI.NSLabel();
             linkLabel2 = new LinkLabel();
-            saveBtn = new GUI.NSButton();
             gamePathString = new GUI.NSTextBox();
             gamePathSelectBtn = new GUI.NSButton();
             nsGroupBox2 = new GUI.NSGroupBox();
@@ -59,23 +59,33 @@
             exitToolStripMenuItem1 = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem1 = new ToolStripMenuItem();
+            openLogFileToolStripMenuItem = new ToolStripMenuItem();
+            openLogFilePathToolStripMenuItem = new ToolStripMenuItem();
+            openSettingsFilePathToolStripMenuItem = new ToolStripMenuItem();
             supportToolStripMenuItem = new ToolStripMenuItem();
             donateToolStripMenuItem = new ToolStripMenuItem();
             flushRamToolStripMenuItem = new ToolStripMenuItem();
+            minimizeToTrayToolStripMenuItem = new ToolStripMenuItem();
             nsGroupBox4 = new GUI.NSGroupBox();
             saveBackupBtn = new GUI.NSButton();
             restoreBackupBtn = new GUI.NSButton();
             nsLabel6 = new GUI.NSLabel();
             backupDropdown = new GUI.NSComboBox();
             nsGroupBox5 = new GUI.NSGroupBox();
-            nsLabel9 = new GUI.NSLabel();
-            nsLabel8 = new GUI.NSLabel();
-            autoFlushSound = new GUI.NSCheckBox();
-            saveAdvancedCfgBtn = new GUI.NSButton();
+            nsTabControl1 = new GUI.NSTabControl();
+            tabPage2 = new TabPage();
+            nsLabel10 = new GUI.NSLabel();
+            highPriority = new GUI.NSCheckBox();
+            tabPage1 = new TabPage();
             nsLabel7 = new GUI.NSLabel();
-            autoFlushMinHour = new GUI.NSComboBox();
-            autoFlushinterval = new NumericUpDown();
             autoFlushChk = new GUI.NSCheckBox();
+            nsLabel9 = new GUI.NSLabel();
+            autoFlushinterval = new NumericUpDown();
+            nsLabel8 = new GUI.NSLabel();
+            autoFlushMinHour = new GUI.NSComboBox();
+            autoFlushSound = new GUI.NSCheckBox();
+            nsSeperator1 = new GUI.NSSeperator();
+            saveAdvancedCfgBtn = new GUI.NSButton();
             linkLabel1 = new LinkLabel();
             label1 = new Label();
             nsGroupBox1.SuspendLayout();
@@ -84,24 +94,37 @@
             menuStrip1.SuspendLayout();
             nsGroupBox4.SuspendLayout();
             nsGroupBox5.SuspendLayout();
+            nsTabControl1.SuspendLayout();
+            tabPage2.SuspendLayout();
+            tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)autoFlushinterval).BeginInit();
             SuspendLayout();
             // 
             // nsGroupBox1
             // 
+            nsGroupBox1.Controls.Add(launchRustBtn);
             nsGroupBox1.Controls.Add(nsLabel1);
             nsGroupBox1.Controls.Add(linkLabel2);
-            nsGroupBox1.Controls.Add(saveBtn);
             nsGroupBox1.Controls.Add(gamePathString);
             nsGroupBox1.Controls.Add(gamePathSelectBtn);
             nsGroupBox1.DrawSeperator = false;
             nsGroupBox1.Location = new Point(12, 37);
             nsGroupBox1.Name = "nsGroupBox1";
-            nsGroupBox1.Size = new Size(642, 87);
+            nsGroupBox1.Size = new Size(642, 137);
             nsGroupBox1.SubTitle = "Select the folder your game is installed in.";
             nsGroupBox1.TabIndex = 0;
             nsGroupBox1.Text = "nsGroupBox1";
             nsGroupBox1.Title = "Game Path";
+            // 
+            // launchRustBtn
+            // 
+            launchRustBtn.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            launchRustBtn.Location = new Point(15, 83);
+            launchRustBtn.Name = "launchRustBtn";
+            launchRustBtn.Size = new Size(613, 40);
+            launchRustBtn.TabIndex = 15;
+            launchRustBtn.Text = "LAUNCH RUST";
+            launchRustBtn.Click += launchRustBtn_Click;
             // 
             // nsLabel1
             // 
@@ -127,15 +150,6 @@
             linkLabel2.Text = "https://rustforge.us/";
             linkLabel2.LinkClicked += linkLabel2_LinkClicked;
             // 
-            // saveBtn
-            // 
-            saveBtn.Location = new Point(551, 46);
-            saveBtn.Name = "saveBtn";
-            saveBtn.Size = new Size(75, 23);
-            saveBtn.TabIndex = 1;
-            saveBtn.Text = "Save";
-            saveBtn.Click += saveBtn_Click;
-            // 
             // gamePathString
             // 
             gamePathString.Location = new Point(113, 46);
@@ -143,14 +157,14 @@
             gamePathString.Multiline = false;
             gamePathString.Name = "gamePathString";
             gamePathString.ReadOnly = false;
-            gamePathString.Size = new Size(351, 23);
+            gamePathString.Size = new Size(432, 23);
             gamePathString.TabIndex = 2;
             gamePathString.TextAlign = HorizontalAlignment.Left;
             gamePathString.UseSystemPasswordChar = false;
             // 
             // gamePathSelectBtn
             // 
-            gamePathSelectBtn.Location = new Point(470, 46);
+            gamePathSelectBtn.Location = new Point(551, 45);
             gamePathSelectBtn.Name = "gamePathSelectBtn";
             gamePathSelectBtn.Size = new Size(75, 23);
             gamePathSelectBtn.TabIndex = 0;
@@ -166,7 +180,7 @@
             nsGroupBox2.Controls.Add(nsLabel3);
             nsGroupBox2.Controls.Add(nsLabel2);
             nsGroupBox2.DrawSeperator = false;
-            nsGroupBox2.Location = new Point(12, 130);
+            nsGroupBox2.Location = new Point(12, 180);
             nsGroupBox2.Name = "nsGroupBox2";
             nsGroupBox2.Size = new Size(642, 144);
             nsGroupBox2.SubTitle = "These are your hardware specs.";
@@ -241,7 +255,7 @@
             nsGroupBox3.Controls.Add(nsLabel5);
             nsGroupBox3.Controls.Add(profileDropdown);
             nsGroupBox3.DrawSeperator = false;
-            nsGroupBox3.Location = new Point(12, 280);
+            nsGroupBox3.Location = new Point(12, 330);
             nsGroupBox3.Name = "nsGroupBox3";
             nsGroupBox3.Size = new Size(311, 144);
             nsGroupBox3.SubTitle = "Select a profile to apply a set of optimized settings.";
@@ -288,12 +302,12 @@
             profileDropdown.Items.AddRange(new object[] { "Competitive (Max FPS)", "Balanced (Good-looking & Fast)", "Recommended (Optimized)", "Ultra (Maximum Visuals)" });
             profileDropdown.Location = new Point(71, 54);
             profileDropdown.Name = "profileDropdown";
-            profileDropdown.Size = new Size(205, 24);
+            profileDropdown.Size = new Size(224, 24);
             profileDropdown.TabIndex = 0;
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, aboutToolStripMenuItem, supportToolStripMenuItem, donateToolStripMenuItem, flushRamToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, aboutToolStripMenuItem, supportToolStripMenuItem, donateToolStripMenuItem, flushRamToolStripMenuItem, minimizeToTrayToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.RenderMode = ToolStripRenderMode.System;
@@ -364,7 +378,7 @@
             // 
             // aboutToolStripMenuItem
             // 
-            aboutToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutToolStripMenuItem1 });
+            aboutToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutToolStripMenuItem1, openLogFileToolStripMenuItem, openLogFilePathToolStripMenuItem, openSettingsFilePathToolStripMenuItem });
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             aboutToolStripMenuItem.Size = new Size(44, 20);
             aboutToolStripMenuItem.Text = "Help";
@@ -372,9 +386,30 @@
             // aboutToolStripMenuItem1
             // 
             aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            aboutToolStripMenuItem1.Size = new Size(107, 22);
+            aboutToolStripMenuItem1.Size = new Size(205, 22);
             aboutToolStripMenuItem1.Text = "About";
             aboutToolStripMenuItem1.Click += aboutToolStripMenuItem1_Click;
+            // 
+            // openLogFileToolStripMenuItem
+            // 
+            openLogFileToolStripMenuItem.Name = "openLogFileToolStripMenuItem";
+            openLogFileToolStripMenuItem.Size = new Size(205, 22);
+            openLogFileToolStripMenuItem.Text = "Open Log File...";
+            openLogFileToolStripMenuItem.Click += openLogFileToolStripMenuItem_Click;
+            // 
+            // openLogFilePathToolStripMenuItem
+            // 
+            openLogFilePathToolStripMenuItem.Name = "openLogFilePathToolStripMenuItem";
+            openLogFilePathToolStripMenuItem.Size = new Size(205, 22);
+            openLogFilePathToolStripMenuItem.Text = "Open Log File Path...";
+            openLogFilePathToolStripMenuItem.Click += openLogFilePathToolStripMenuItem_Click;
+            // 
+            // openSettingsFilePathToolStripMenuItem
+            // 
+            openSettingsFilePathToolStripMenuItem.Name = "openSettingsFilePathToolStripMenuItem";
+            openSettingsFilePathToolStripMenuItem.Size = new Size(205, 22);
+            openSettingsFilePathToolStripMenuItem.Text = "Open Settings File Path...";
+            openSettingsFilePathToolStripMenuItem.Click += openSettingsFilePathToolStripMenuItem_Click;
             // 
             // supportToolStripMenuItem
             // 
@@ -397,6 +432,13 @@
             flushRamToolStripMenuItem.Text = "Flush Ram...";
             flushRamToolStripMenuItem.Click += flushRamToolStripMenuItem_Click;
             // 
+            // minimizeToTrayToolStripMenuItem
+            // 
+            minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
+            minimizeToTrayToolStripMenuItem.Size = new Size(116, 20);
+            minimizeToTrayToolStripMenuItem.Text = "Minimize to Tray...";
+            minimizeToTrayToolStripMenuItem.Click += minimizeToTrayToolStripMenuItem_Click;
+            // 
             // nsGroupBox4
             // 
             nsGroupBox4.Controls.Add(saveBackupBtn);
@@ -404,7 +446,7 @@
             nsGroupBox4.Controls.Add(nsLabel6);
             nsGroupBox4.Controls.Add(backupDropdown);
             nsGroupBox4.DrawSeperator = false;
-            nsGroupBox4.Location = new Point(329, 280);
+            nsGroupBox4.Location = new Point(329, 330);
             nsGroupBox4.Name = "nsGroupBox4";
             nsGroupBox4.Size = new Size(325, 144);
             nsGroupBox4.SubTitle = "Back-up, and Restore your game settings";
@@ -455,27 +497,107 @@
             // 
             // nsGroupBox5
             // 
-            nsGroupBox5.Controls.Add(nsLabel9);
-            nsGroupBox5.Controls.Add(nsLabel8);
-            nsGroupBox5.Controls.Add(autoFlushSound);
+            nsGroupBox5.Controls.Add(nsTabControl1);
             nsGroupBox5.Controls.Add(saveAdvancedCfgBtn);
-            nsGroupBox5.Controls.Add(nsLabel7);
-            nsGroupBox5.Controls.Add(autoFlushMinHour);
-            nsGroupBox5.Controls.Add(autoFlushinterval);
-            nsGroupBox5.Controls.Add(autoFlushChk);
             nsGroupBox5.DrawSeperator = false;
-            nsGroupBox5.Location = new Point(12, 430);
+            nsGroupBox5.Location = new Point(12, 480);
             nsGroupBox5.Name = "nsGroupBox5";
-            nsGroupBox5.Size = new Size(642, 160);
+            nsGroupBox5.Size = new Size(642, 196);
             nsGroupBox5.SubTitle = "Set RAM to Auto Flush, and more.";
             nsGroupBox5.TabIndex = 6;
             nsGroupBox5.Text = "nsGroupBox5";
             nsGroupBox5.Title = "Optimization Tools";
             // 
+            // nsTabControl1
+            // 
+            nsTabControl1.Alignment = TabAlignment.Left;
+            nsTabControl1.Controls.Add(tabPage2);
+            nsTabControl1.Controls.Add(tabPage1);
+            nsTabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
+            nsTabControl1.ItemSize = new Size(28, 115);
+            nsTabControl1.Location = new Point(3, 49);
+            nsTabControl1.Multiline = true;
+            nsTabControl1.Name = "nsTabControl1";
+            nsTabControl1.SelectedIndex = 0;
+            nsTabControl1.Size = new Size(639, 109);
+            nsTabControl1.SizeMode = TabSizeMode.Fixed;
+            nsTabControl1.TabIndex = 15;
+            // 
+            // tabPage2
+            // 
+            tabPage2.BackColor = Color.FromArgb(0, 0, 0);
+            tabPage2.Controls.Add(nsLabel10);
+            tabPage2.Controls.Add(highPriority);
+            tabPage2.Location = new Point(119, 4);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(516, 101);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "General Tools";
+            // 
+            // nsLabel10
+            // 
+            nsLabel10.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            nsLabel10.Location = new Point(6, 7);
+            nsLabel10.Name = "nsLabel10";
+            nsLabel10.Size = new Size(158, 23);
+            nsLabel10.TabIndex = 14;
+            nsLabel10.Text = "nsLabel10";
+            nsLabel10.Value1 = " ";
+            nsLabel10.Value2 = "Rust CPU High Priority:";
+            // 
+            // highPriority
+            // 
+            highPriority.Checked = false;
+            highPriority.Location = new Point(170, 7);
+            highPriority.Name = "highPriority";
+            highPriority.Size = new Size(120, 23);
+            highPriority.TabIndex = 13;
+            highPriority.Text = "Enable/Disable";
+            // 
+            // tabPage1
+            // 
+            tabPage1.BackColor = Color.FromArgb(0, 0, 0);
+            tabPage1.Controls.Add(nsLabel7);
+            tabPage1.Controls.Add(autoFlushChk);
+            tabPage1.Controls.Add(nsLabel9);
+            tabPage1.Controls.Add(autoFlushinterval);
+            tabPage1.Controls.Add(nsLabel8);
+            tabPage1.Controls.Add(autoFlushMinHour);
+            tabPage1.Controls.Add(autoFlushSound);
+            tabPage1.Controls.Add(nsSeperator1);
+            tabPage1.Location = new Point(119, 4);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(516, 101);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "Auto Flush";
+            // 
+            // nsLabel7
+            // 
+            nsLabel7.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            nsLabel7.Location = new Point(6, 46);
+            nsLabel7.Name = "nsLabel7";
+            nsLabel7.Size = new Size(158, 23);
+            nsLabel7.TabIndex = 8;
+            nsLabel7.Text = "nsLabel7";
+            nsLabel7.Value1 = " ";
+            nsLabel7.Value2 = "Auto Flush Interval:";
+            // 
+            // autoFlushChk
+            // 
+            autoFlushChk.Checked = false;
+            autoFlushChk.Location = new Point(170, 7);
+            autoFlushChk.Name = "autoFlushChk";
+            autoFlushChk.Size = new Size(120, 23);
+            autoFlushChk.TabIndex = 9;
+            autoFlushChk.Text = "Enable/Disable";
+            autoFlushChk.CheckedChanged += autoFlushChk_CheckedChanged;
+            // 
             // nsLabel9
             // 
             nsLabel9.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
-            nsLabel9.Location = new Point(14, 55);
+            nsLabel9.Location = new Point(6, 7);
             nsLabel9.Name = "nsLabel9";
             nsLabel9.Size = new Size(156, 23);
             nsLabel9.TabIndex = 12;
@@ -483,46 +605,28 @@
             nsLabel9.Value1 = " ";
             nsLabel9.Value2 = "Auto Flush Enable:";
             // 
+            // autoFlushinterval
+            // 
+            autoFlushinterval.BackColor = Color.FromArgb(70, 70, 70);
+            autoFlushinterval.ForeColor = Color.White;
+            autoFlushinterval.Location = new Point(170, 44);
+            autoFlushinterval.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            autoFlushinterval.Name = "autoFlushinterval";
+            autoFlushinterval.Size = new Size(117, 23);
+            autoFlushinterval.TabIndex = 0;
+            autoFlushinterval.Value = new decimal(new int[] { 15, 0, 0, 0 });
+            autoFlushinterval.ValueChanged += autoFlushinterval_ValueChanged;
+            // 
             // nsLabel8
             // 
             nsLabel8.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
-            nsLabel8.Location = new Point(345, 55);
+            nsLabel8.Location = new Point(6, 73);
             nsLabel8.Name = "nsLabel8";
             nsLabel8.Size = new Size(158, 23);
             nsLabel8.TabIndex = 10;
             nsLabel8.Text = "nsLabel8";
             nsLabel8.Value1 = " ";
             nsLabel8.Value2 = "RAM Flush SFX:";
-            // 
-            // autoFlushSound
-            // 
-            autoFlushSound.Checked = false;
-            autoFlushSound.Location = new Point(509, 55);
-            autoFlushSound.Name = "autoFlushSound";
-            autoFlushSound.Size = new Size(120, 23);
-            autoFlushSound.TabIndex = 11;
-            autoFlushSound.Text = "Enable/Disable";
-            autoFlushSound.CheckedChanged += autoFlushSound_CheckedChanged;
-            // 
-            // saveAdvancedCfgBtn
-            // 
-            saveAdvancedCfgBtn.Location = new Point(274, 125);
-            saveAdvancedCfgBtn.Name = "saveAdvancedCfgBtn";
-            saveAdvancedCfgBtn.Size = new Size(95, 23);
-            saveAdvancedCfgBtn.TabIndex = 4;
-            saveAdvancedCfgBtn.Text = "Save Config";
-            saveAdvancedCfgBtn.Click += saveAdvancedCfgBtn_Click;
-            // 
-            // nsLabel7
-            // 
-            nsLabel7.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
-            nsLabel7.Location = new Point(14, 84);
-            nsLabel7.Name = "nsLabel7";
-            nsLabel7.Size = new Size(158, 23);
-            nsLabel7.TabIndex = 8;
-            nsLabel7.Text = "nsLabel7";
-            nsLabel7.Value1 = " ";
-            nsLabel7.Value2 = "Auto Flush Interval:";
             // 
             // autoFlushMinHour
             // 
@@ -532,39 +636,44 @@
             autoFlushMinHour.ForeColor = Color.White;
             autoFlushMinHour.FormattingEnabled = true;
             autoFlushMinHour.Items.AddRange(new object[] { "Minutes", "Hours" });
-            autoFlushMinHour.Location = new Point(301, 81);
+            autoFlushMinHour.Location = new Point(293, 43);
             autoFlushMinHour.Name = "autoFlushMinHour";
-            autoFlushMinHour.Size = new Size(156, 24);
+            autoFlushMinHour.Size = new Size(211, 24);
             autoFlushMinHour.TabIndex = 8;
             // 
-            // autoFlushinterval
+            // autoFlushSound
             // 
-            autoFlushinterval.BackColor = Color.FromArgb(70, 70, 70);
-            autoFlushinterval.ForeColor = Color.White;
-            autoFlushinterval.Location = new Point(178, 82);
-            autoFlushinterval.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            autoFlushinterval.Name = "autoFlushinterval";
-            autoFlushinterval.Size = new Size(117, 23);
-            autoFlushinterval.TabIndex = 0;
-            autoFlushinterval.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            autoFlushinterval.ValueChanged += autoFlushinterval_ValueChanged;
+            autoFlushSound.Checked = false;
+            autoFlushSound.Location = new Point(170, 73);
+            autoFlushSound.Name = "autoFlushSound";
+            autoFlushSound.Size = new Size(120, 23);
+            autoFlushSound.TabIndex = 11;
+            autoFlushSound.Text = "Enable/Disable";
+            autoFlushSound.CheckedChanged += autoFlushSound_CheckedChanged;
             // 
-            // autoFlushChk
+            // nsSeperator1
             // 
-            autoFlushChk.Checked = false;
-            autoFlushChk.Location = new Point(178, 55);
-            autoFlushChk.Name = "autoFlushChk";
-            autoFlushChk.Size = new Size(120, 23);
-            autoFlushChk.TabIndex = 9;
-            autoFlushChk.Text = "Enable/Disable";
-            autoFlushChk.CheckedChanged += autoFlushChk_CheckedChanged;
+            nsSeperator1.Location = new Point(1, 29);
+            nsSeperator1.Name = "nsSeperator1";
+            nsSeperator1.Size = new Size(513, 10);
+            nsSeperator1.TabIndex = 13;
+            nsSeperator1.Text = "nsSeperator1";
+            // 
+            // saveAdvancedCfgBtn
+            // 
+            saveAdvancedCfgBtn.Location = new Point(8, 161);
+            saveAdvancedCfgBtn.Name = "saveAdvancedCfgBtn";
+            saveAdvancedCfgBtn.Size = new Size(626, 29);
+            saveAdvancedCfgBtn.TabIndex = 4;
+            saveAdvancedCfgBtn.Text = "Save Settings";
+            saveAdvancedCfgBtn.Click += saveAdvancedCfgBtn_Click;
             // 
             // linkLabel1
             // 
             linkLabel1.AutoSize = true;
             linkLabel1.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             linkLabel1.LinkColor = Color.Orange;
-            linkLabel1.Location = new Point(314, 594);
+            linkLabel1.Location = new Point(314, 683);
             linkLabel1.Name = "linkLabel1";
             linkLabel1.Size = new Size(258, 17);
             linkLabel1.TabIndex = 13;
@@ -576,7 +685,7 @@
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(116, 596);
+            label1.Location = new Point(116, 685);
             label1.Name = "label1";
             label1.Size = new Size(198, 15);
             label1.TabIndex = 13;
@@ -588,7 +697,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
-            ClientSize = new Size(666, 621);
+            ClientSize = new Size(666, 710);
             Controls.Add(label1);
             Controls.Add(linkLabel1);
             Controls.Add(nsGroupBox5);
@@ -614,6 +723,9 @@
             menuStrip1.PerformLayout();
             nsGroupBox4.ResumeLayout(false);
             nsGroupBox5.ResumeLayout(false);
+            nsTabControl1.ResumeLayout(false);
+            tabPage2.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)autoFlushinterval).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -623,7 +735,6 @@
 
         private GUI.NSGroupBox nsGroupBox1;
         private GUI.NSLabel nsLabel1;
-        private GUI.NSButton saveBtn;
         private GUI.NSTextBox gamePathString;
         private GUI.NSButton gamePathSelectBtn;
         private GUI.NSGroupBox nsGroupBox2;
@@ -675,5 +786,16 @@
         private ToolStripMenuItem toolStripMenuItem6;
         private ToolStripMenuItem donateToolStripMenuItem;
         public GUI.NSCheckBox autoFlushChk;
+        private GUI.NSLabel nsLabel10;
+        public GUI.NSCheckBox highPriority;
+        private ToolStripMenuItem minimizeToTrayToolStripMenuItem;
+        private GUI.NSButton launchRustBtn;
+        private GUI.NSTabControl nsTabControl1;
+        private TabPage tabPage1;
+        private TabPage tabPage2;
+        private GUI.NSSeperator nsSeperator1;
+        private ToolStripMenuItem openLogFileToolStripMenuItem;
+        private ToolStripMenuItem openLogFilePathToolStripMenuItem;
+        private ToolStripMenuItem openSettingsFilePathToolStripMenuItem;
     }
 }
