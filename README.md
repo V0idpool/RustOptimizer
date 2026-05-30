@@ -38,6 +38,6 @@
 
 ### Useful Links
 
-* **Download:** [https://github.com/V0idpool/RustOptimizer/releases](https://github.com/V0idpool/RustOptimizer/releases)
+* **Download:** [https://www.nexusmods.com/rust/mods/5](https://www.nexusmods.com/rust/mods/5)
 * **Support:** [https://discord.gg/R4bR9JwAfv](https://discord.gg/R4bR9JwAfv)
 * **Donations:** [https://buymeacoffee.com/rustforgedev](https://buymeacoffee.com/rustforgedev)
