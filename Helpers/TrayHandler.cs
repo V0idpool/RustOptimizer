@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RustOptimizer.Core;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -28,9 +29,7 @@ namespace RustOptimizer.Helpers
                 return;
             }
 
-            var ini = new inisettings { Path = MainFrm.ConfigPath };
-
-            string rustPath = ini.ReadValue("AppSettings", "GamePath");
+            string rustPath = UserConfigs.GamePath;
             if (string.IsNullOrWhiteSpace(rustPath))
             {
                 MessageBox.Show("Rust path is not set. Please set your game path in the settings.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

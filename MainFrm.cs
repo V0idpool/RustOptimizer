@@ -8,9 +8,6 @@ namespace RustOptimizer
     public partial class MainFrm : Form
     {
         public static MainFrm Instance { get; private set; }
-        public static string ConfigPath { get; private set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Rust Optimizer", "User", "UserCFG.ini");
-        private string BackupsPath { get; set; } = Path.Combine(Application.StartupPath, "backups");
-        private string GameConfigPath => Path.Combine(gamePathString.Text, "cfg", "client.cfg");
         private RustConfig rustConfig = new RustConfig();
         public System.Windows.Forms.Timer autoFlushTimer;
         public NotifyIcon sysTrayIcon;
@@ -22,35 +19,35 @@ namespace RustOptimizer
 
         private void MainFrm_Load(object sender, EventArgs e)
         {
+            _ = Updates.CheckForUpdates();
             System.Version currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             string versionString = currentVersion.Major.ToString() + "." + currentVersion.Minor.ToString();
             MainFrm.Instance.Text = $"Rust Optimizer v{versionString}";
-            var ini = new RustOptimizer.Helpers.inisettings { Path = ConfigPath };
-            string directory = Path.GetDirectoryName(ConfigPath);
+            UserConfigs.Refresh();
+            string directory = Path.GetDirectoryName(UserConfigs.ConfigPath);
 
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            if (!File.Exists(ConfigPath))
+            if (!File.Exists(UserConfigs.ConfigPath))
             {
-                Helpers.EmbedResources.SaveToDisk("UserCFG.ini", ConfigPath);
+                Helpers.EmbedResources.SaveToDisk("UserCFG.ini", UserConfigs.ConfigPath);
             }
 
-            string gamePath = ini.ReadValue("AppSettings", "GamePath");
+            string gamePath = UserConfigs.GamePath;
             if (!string.IsNullOrEmpty(gamePath))
             {
                 gamePathString.Text = gamePath;
             }
 
-            BackupsPath = ini.ReadValue("AppSettings", "BackupPath");
-            if (string.IsNullOrEmpty(BackupsPath))
+            string backupsPath = UserConfigs.BackupsPath;
+            if (string.IsNullOrEmpty(backupsPath))
             {
-                BackupsPath = Path.Combine(Application.StartupPath, "backups");
-                ini.WriteValue("AppSettings", "BackupPath", BackupsPath, ini.Path);
+                UserConfigs.BackupsPath = Path.Combine(Application.StartupPath, "backups");
             }
-            string savedProfile = ini.ReadValue("AppSettings", "Profile");
+            string savedProfile = UserConfigs.SavedProfile;
             if (!string.IsNullOrEmpty(savedProfile) && profileDropdown.Items.Contains(savedProfile))
             {
                 profileDropdown.SelectedItem = savedProfile;
@@ -61,8 +58,8 @@ namespace RustOptimizer
                 profileDropdown.SelectedItem = recommendedProfile;
                 MessageBox.Show($"Based on your hardware, we recommend the '{recommendedProfile}' profile for the best experience.", "Profile Recommendation", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            int interval = ini.GetInteger("AppSettings", "FlushInterval", 15);
-            string unitStr = ini.ReadValue("AppSettings", "FlushUnit");
+            int interval = UserConfigs.AutoFlushInterval;
+            string unitStr = UserConfigs.AutoFlushUnit;
             autoFlushinterval.Value = interval;
 
             if (!string.IsNullOrEmpty(unitStr) && (unitStr.Equals("Minutes", StringComparison.OrdinalIgnoreCase) || unitStr.Equals("Hours", StringComparison.OrdinalIgnoreCase)))
@@ -74,31 +71,26 @@ namespace RustOptimizer
                 autoFlushMinHour.Text = "Minutes";
             }
 
-            bool autoFlush = ini.GetBoolean("AppSettings", "AutoFlush", false);
-            autoFlushChk.Checked = autoFlush;
+                autoFlushChk.Checked = UserConfigs.AutoFlushEnabled;
+                highPriority.Checked = UserConfigs.CPUHighPriority;
+                Optimizer.SetPriority(UserConfigs.CPUHighPriority);
 
-
-            bool cpuHighPriority = ini.GetBoolean("AppSettings", "CPUHighPriority", false);
-            highPriority.Checked = cpuHighPriority;
-            Optimizer.SetPriority(cpuHighPriority);
-            bool flushSound = ini.GetBoolean("AppSettings", "FlushSound", false);
-            autoFlushSound.Checked = flushSound;
+                autoFlushSound.Checked = UserConfigs.AutoFlushSfx;
             if (autoFlushChk.Checked && !Optimizer.IsAdministrator())
             {
                 autoFlushChk.Checked = false;
-
-                ini.WriteValue("AppSettings", "AutoFlush", "False", ini.Path);
+                UserConfigs.AutoFlushEnabled = false;
 
                 DialogResult result = MessageBox.Show(
-             "Auto Flush requires Rust Optimizer to be run as Administrator.\n\nWould you like to restart the application as Administrator now?",
-             "Administrator Required",
-             MessageBoxButtons.OKCancel,
-             MessageBoxIcon.Warning
-         );
+                "Auto Flush requires Rust Optimizer to be run as Administrator.\n\nWould you like to restart the application as Administrator now?",
+                "Administrator Required",
+                 MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Warning
+                );
 
                 if (result == DialogResult.OK)
                 {
-                    ini.WriteValue("AppSettings", "AutoFlush", "True", ini.Path);
+                    UserConfigs.AutoFlushEnabled = true;
                     autoFlushChk.Checked = true;
                     ProcessStartInfo startInfo = new ProcessStartInfo
                     {
@@ -116,7 +108,7 @@ namespace RustOptimizer
                     }
                     catch (System.ComponentModel.Win32Exception)
                     {
-                        ini.WriteValue("AppSettings", "AutoFlush", "False", ini.Path);
+                        UserConfigs.AutoFlushEnabled=false;
                         autoFlushChk.Checked = false;
                         MessageBox.Show("Restart canceled. Rust Optimizer will run in standard user mode without Auto Flush features.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
@@ -153,9 +145,9 @@ namespace RustOptimizer
         private void LoadBackups()
         {
             backupDropdown.Items.Clear();
-            if (Directory.Exists(BackupsPath))
+            if (Directory.Exists(UserConfigs.BackupsPath))
             {
-                string[] backupDirectories = Directory.GetDirectories(BackupsPath, "Backup-*");
+                string[] backupDirectories = Directory.GetDirectories(UserConfigs.BackupsPath, "Backup-*");
                 foreach (string dir in backupDirectories)
                 {
                     backupDropdown.Items.Add(Path.GetFileName(dir));
@@ -193,7 +185,7 @@ namespace RustOptimizer
         /// </summary>
         private void gamePathSelectBtn_Click(object sender, EventArgs e)
         {
-            var ini = new inisettings { Path = ConfigPath };
+            var ini = new inisettings { Path = UserConfigs.ConfigPath };
             using (var fbd = new FolderBrowserDialog())
             {
                 DialogResult result = fbd.ShowDialog();
@@ -202,6 +194,7 @@ namespace RustOptimizer
                 {
                     gamePathString.Text = fbd.SelectedPath;
                     ini.WriteValue("AppSettings", "GamePath", fbd.SelectedPath, ini.Path);
+                    UserConfigs.Refresh();
                 }
             }
         }
@@ -231,7 +224,7 @@ namespace RustOptimizer
                 return;
             }
 
-            rustConfig.LoadSettings(GameConfigPath);
+            rustConfig.LoadSettings(UserConfigs.GameConfigPath);
 
             var optimalSettings = Optimizer.GetOptimalSettings(profile);
 
@@ -240,7 +233,7 @@ namespace RustOptimizer
                 rustConfig.SetSetting(setting.Key, setting.Value);
             }
 
-            rustConfig.SaveSettings(GameConfigPath);
+            rustConfig.SaveSettings(UserConfigs.GameConfigPath);
             MessageBox.Show($"'{profile}' profile applied successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         /// <summary>
@@ -248,17 +241,17 @@ namespace RustOptimizer
         /// </summary>
         private void saveBackupBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(GameConfigPath))
+            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(UserConfigs.GameConfigPath))
             {
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             string backupFolder = "Backup-" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
-            string newBackupPath = Path.Combine(BackupsPath, backupFolder);
+            string newBackupPath = Path.Combine(UserConfigs.BackupsPath, backupFolder);
 
             Directory.CreateDirectory(newBackupPath);
-            rustConfig.LoadSettings(GameConfigPath);
+            rustConfig.LoadSettings(UserConfigs.GameConfigPath);
             rustConfig.SaveSettings(Path.Combine(newBackupPath, "client.cfg"));
             MessageBox.Show("Settings backup saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             LoadBackups();
@@ -281,7 +274,7 @@ namespace RustOptimizer
             }
 
             string selectedBackupFolder = backupDropdown.SelectedItem.ToString();
-            string backupConfigPath = Path.Combine(BackupsPath, selectedBackupFolder, "client.cfg");
+            string backupConfigPath = Path.Combine(UserConfigs.BackupsPath, selectedBackupFolder, "client.cfg");
 
             if (!File.Exists(backupConfigPath))
             {
@@ -289,7 +282,7 @@ namespace RustOptimizer
                 return;
             }
 
-            File.Copy(backupConfigPath, GameConfigPath, true);
+            File.Copy(backupConfigPath, UserConfigs.GameConfigPath, true);
             MessageBox.Show("Settings restored successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         /// <summary>
@@ -306,9 +299,9 @@ namespace RustOptimizer
 
             using (var fbd = new FolderBrowserDialog())
             {
-                string initialPath = BackupsPath;
+                string initialPath = UserConfigs.BackupsPath;
 
-                if (Directory.Exists(BackupsPath))
+                if (Directory.Exists(UserConfigs.BackupsPath))
                 {
                     fbd.SelectedPath = initialPath;
                 }
@@ -331,7 +324,7 @@ namespace RustOptimizer
 
                     try
                     {
-                        File.Copy(backupConfigPath, GameConfigPath, true);
+                        File.Copy(backupConfigPath, UserConfigs.GameConfigPath, true);
                         MessageBox.Show("Settings restored successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
@@ -347,15 +340,15 @@ namespace RustOptimizer
         /// </summary>
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(GameConfigPath))
+            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(UserConfigs.GameConfigPath))
             {
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             string backupFolder = "Backup-" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
-            string newBackupPath = Path.Combine(BackupsPath, backupFolder);
+            string newBackupPath = Path.Combine(UserConfigs.BackupsPath, backupFolder);
             Directory.CreateDirectory(newBackupPath);
-            File.Copy(GameConfigPath, Path.Combine(newBackupPath, "client.cfg"));
+            File.Copy(UserConfigs.GameConfigPath, Path.Combine(newBackupPath, "client.cfg"));
             MessageBox.Show("Settings backup saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             LoadBackups();
         }
@@ -366,18 +359,19 @@ namespace RustOptimizer
         {
             using (var fbd = new FolderBrowserDialog())
             {
-                if (Directory.Exists(BackupsPath))
+                if (Directory.Exists(UserConfigs.BackupsPath))
                 {
-                    fbd.SelectedPath = BackupsPath;
+                    fbd.SelectedPath = UserConfigs.BackupsPath;
                 }
 
                 fbd.Description = "Select a new location for your backups:";
 
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
-                    var ini = new inisettings { Path = ConfigPath };
+                    var ini = new inisettings { Path = UserConfigs.ConfigPath };
                     ini.WriteValue("AppSettings", "BackupPath", fbd.SelectedPath, ini.Path);
-                    BackupsPath = fbd.SelectedPath;
+                    UserConfigs.BackupsPath = fbd.SelectedPath;
+                    UserConfigs.Refresh();
                     LoadBackups();
 
                     MessageBox.Show("Backup path updated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -399,7 +393,7 @@ namespace RustOptimizer
 
             try
             {
-                Helpers.EmbedResources.SaveToDisk("client.cfg", GameConfigPath);
+                Helpers.EmbedResources.SaveToDisk("client.cfg", UserConfigs.GameConfigPath);
                 MessageBox.Show("Default settings restored successfully! Restart your game for changes to take effect.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -475,7 +469,7 @@ namespace RustOptimizer
         /// </summary>
         private void exportProfileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(GameConfigPath))
+            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(UserConfigs.GameConfigPath))
             {
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -491,7 +485,7 @@ namespace RustOptimizer
                 {
                     try
                     {
-                        File.Copy(GameConfigPath, sfd.FileName, true);
+                        File.Copy(UserConfigs.GameConfigPath, sfd.FileName, true);
                         MessageBox.Show("Profile exported successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
@@ -522,7 +516,7 @@ namespace RustOptimizer
                 {
                     try
                     {
-                        File.Copy(ofd.FileName, GameConfigPath, true);
+                        File.Copy(ofd.FileName, UserConfigs.GameConfigPath, true);
                         MessageBox.Show("Profile imported successfully! Restart your game for changes to take effect.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         var result = MessageBox.Show("Would you like to save this imported profile as a new backup?", "Save as Backup", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -547,7 +541,7 @@ namespace RustOptimizer
 
         private void saveAdvancedCfgBtn_Click(object sender, EventArgs e)
         {
-            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
+            var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
 
             ini.WriteValue("AppSettings", "GamePath", gamePathString.Text, ini.Path);
             ini.WriteValue("AppSettings", "Profile", profileDropdown.Text, ini.Path);
@@ -556,7 +550,7 @@ namespace RustOptimizer
             ini.WriteValue("AppSettings", "FlushUnit", autoFlushMinHour.Text, ini.Path);
             ini.WriteValue("AppSettings", "FlushSound", autoFlushSound.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
             ini.WriteValue("AppSettings", "CPUHighPriority", highPriority.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
-
+            UserConfigs.Refresh();
             Optimizer.InitializeAutoFlushTimer();
             Optimizer.SetPriority(highPriority.Checked);
             MessageBox.Show("Settings Saved!", "Rust Optimizer", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -589,20 +583,23 @@ namespace RustOptimizer
 
         private void autoFlushSound_CheckedChanged(object sender)
         {
-            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
+            var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
             ini.WriteValue("AppSettings", "FlushSound", autoFlushSound.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
+            UserConfigs.Refresh();
         }
 
         private void autoFlushChk_CheckedChanged(object sender)
         {
-            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
+            var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
             ini.WriteValue("AppSettings", "AutoFlush", autoFlushChk.Checked.ToString(), ini.Path);
+            UserConfigs.Refresh();
         }
 
         private void autoFlushinterval_ValueChanged(object sender, EventArgs e)
         {
-            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
+            var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
             ini.WriteValue("AppSettings", "FlushInterval", autoFlushinterval.Value.ToString(CultureInfo.InvariantCulture), ini.Path);
+            UserConfigs.Refresh();
         }
 
         private void donateToolStripMenuItem_Click(object sender, EventArgs e)
@@ -677,7 +674,7 @@ namespace RustOptimizer
         {
             try
             {
-                string settingsFilePath = ConfigPath;
+                string settingsFilePath = UserConfigs.ConfigPath;
                 string settingsDirectory = System.IO.Path.GetDirectoryName(settingsFilePath);
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(settingsDirectory)
                 {
@@ -693,3 +690,4 @@ namespace RustOptimizer
         }
     }
 }
+

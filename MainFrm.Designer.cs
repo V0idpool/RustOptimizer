@@ -735,7 +735,6 @@
 
         private GUI.NSGroupBox nsGroupBox1;
         private GUI.NSLabel nsLabel1;
-        private GUI.NSTextBox gamePathString;
         private GUI.NSButton gamePathSelectBtn;
         private GUI.NSGroupBox nsGroupBox2;
         private Label lblGPUInfo;
@@ -797,5 +796,6 @@
         private ToolStripMenuItem openLogFileToolStripMenuItem;
         private ToolStripMenuItem openLogFilePathToolStripMenuItem;
         private ToolStripMenuItem openSettingsFilePathToolStripMenuItem;
+        public GUI.NSTextBox gamePathString;
     }
 }

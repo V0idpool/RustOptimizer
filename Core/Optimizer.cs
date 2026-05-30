@@ -161,9 +161,7 @@ namespace RustOptimizer.Core
         {
             try
             {
-                var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
-               
-                bool playSound = ini.GetBoolean("AppSettings", "FlushSound", false);
+                bool playSound = UserConfigs.AutoFlushSfx;
 
                 if (!playSound) return;
 
@@ -209,14 +207,13 @@ namespace RustOptimizer.Core
         /// </summary>
         public static void FlushStandbyList(bool isAutoFlush = false)
         {
-            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
             if (!IsAdministrator())
             {
                 if (!isAutoFlush)
                 {
                     MainFrm.Instance.autoFlushChk.Checked = false;
 
-                    ini.WriteValue("AppSettings", "AutoFlush", "False", ini.Path);
+                    UserConfigs.AutoFlushEnabled = false;
 
                     DialogResult result = MessageBox.Show(
                  "The Flush RAM feature requires Rust Optimizer to be run as Administrator.\n\nWould you like to restart the application as Administrator now?",
@@ -227,7 +224,7 @@ namespace RustOptimizer.Core
 
                     if (result == DialogResult.OK)
                     {
-                        ini.WriteValue("AppSettings", "AutoFlush", "True", ini.Path);
+                        UserConfigs.AutoFlushEnabled = true;
                         MainFrm.Instance.autoFlushChk.Checked = true;
                         ProcessStartInfo startInfo = new ProcessStartInfo
                         {
@@ -245,7 +242,7 @@ namespace RustOptimizer.Core
                         }
                         catch (System.ComponentModel.Win32Exception)
                         {
-                            ini.WriteValue("AppSettings", "AutoFlush", "False", ini.Path);
+                            UserConfigs.AutoFlushEnabled= false;
                             MainFrm.Instance.autoFlushChk.Checked = false;
                             MessageBox.Show("Restart canceled. Rust Optimizer will run in standard user mode without Auto Flush features.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
@@ -303,28 +300,25 @@ namespace RustOptimizer.Core
                 MainFrm.Instance.autoFlushTimer = null;
             }
 
-            var ini = new RustOptimizer.Helpers.inisettings { Path = MainFrm.ConfigPath };
-            bool isAutoFlushEnabled = ini.GetBoolean("AppSettings", "AutoFlush", false);
+            
+            bool isAutoFlushEnabled = UserConfigs.AutoFlushEnabled;
 
             if (!isAutoFlushEnabled)
             {
                 return;
             }
 
-            string intervalStr = ini.ReadValue("AppSettings", "FlushInterval");
-            string unitStr = ini.ReadValue("AppSettings", "FlushUnit");
-
-            if (int.TryParse(intervalStr, out int intervalVal) && intervalVal > 0)
+            if (UserConfigs.AutoFlushInterval > 0)
             {
                 int intervalMs;
 
-                if (unitStr?.Equals("Hours", StringComparison.OrdinalIgnoreCase) == true)
+                if (UserConfigs.AutoFlushUnit?.Equals("Hours", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    intervalMs = intervalVal * 60 * 60 * 1000;
+                    intervalMs = UserConfigs.AutoFlushInterval * 60 * 60 * 1000;
                 }
                 else
                 {
-                    intervalMs = intervalVal * 60 * 1000;
+                    intervalMs = UserConfigs.AutoFlushInterval * 60 * 1000;
                 }
 
                 MainFrm.Instance.autoFlushTimer = new System.Windows.Forms.Timer();
