@@ -10,11 +10,13 @@
 * **Hardware Auto-Detection:** Automatically detects your CPU, GPU, and RAM to recommend an optimal profile for your system.
 * **Optimization Profiles:** Choose from a list of pre-configured settings tailored for different goals:
     * **Competitive (Maximum FPS):** Strips down visuals for the highest possible frame rates.
+    * **PvP (Steam Guide 2026):** Applies the Rust-only visibility and performance settings from the [PvP settings guide](https://steamcommunity.com/sharedfiles/filedetails/?id=3288259810). It uses the primary monitor's active resolution and refresh rate, and enables DLSS Max Quality with anti-aliasing disabled on NVIDIA GPUs. AMD control-panel and Windows tweaks are not included.
     * **Balanced (Good Performance & Looks):** A great mix of graphical fidelity and performance.
     * **Recommended (Optimized):** The ideal settings for your specific hardware.
     * **Ultra (Maximum Visuals):** Pushes graphics to the limit for a stunning experience.
 * **Import & Export Custom Profiles:** Save your current game settings to a shareable file (.rop) or import a profile from a friend to use their setup.
 * **Easy Configuration:** Select your game folder and apply your chosen profile with a single button click.
+* **Optional PvP Shortcuts:** Enable the guide's in-game zoom, weapon-view, combat log, look-radius, visibility, and auto-run commands when applying a profile.
 * **Backup & Restore:** Create backups of your current `client.cfg` file before making changes, so you can easily revert to your original settings at any time. You can also manually restore backups or load the default settings.
 * **User-Friendly Interface:** The simple and intuitive interface makes it easy for anyone to optimize their game without needing to manually edit configuration files.
 * **Discord Support:** Get direct support and connect with the community by joining the official Discord server.

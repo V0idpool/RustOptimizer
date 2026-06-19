@@ -45,10 +45,12 @@ namespace RustOptimizer.Helpers
 
             try
             {
+                var displayMode = HardwareDetector.GetPrimaryDisplayMode();
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = rustExe,
                     WorkingDirectory = rustPath,
+                    Arguments = $"-screen-width {displayMode.Width} -screen-height {displayMode.Height} -screen-fullscreen 1",
                     UseShellExecute = true
                 });
             }

@@ -12,6 +12,8 @@ namespace RustOptimizer.Core
 {
     public static class Optimizer
     {
+        public const string PvpGuideProfileName = "PvP (Steam Guide 2026)";
+
         [DllImport("advapi32.dll", SetLastError = true)]
         private static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);
 
@@ -48,6 +50,12 @@ namespace RustOptimizer.Core
         public static Dictionary<string, string> GetOptimalSettings(string profile)
         {
             var settings = new Dictionary<string, string>();
+
+            if (profile == PvpGuideProfileName)
+            {
+                ApplyPvpGuideSettings(settings);
+                return settings;
+            }
 
             // Universal Settings for all profiles
             settings.Add("graphics.vsync", "False");
@@ -153,6 +161,101 @@ namespace RustOptimizer.Core
                     goto case "Recommended (Optimized)";
             }
             return settings;
+        }
+
+        private static void ApplyPvpGuideSettings(Dictionary<string, string> settings)
+        {
+            var displayMode = HardwareDetector.GetPrimaryDisplayMode();
+
+            // Rust-only values shown in the guide. GPU control-panel and Windows tweaks
+            // are intentionally excluded from this profile.
+            settings["graphics.fov"] = "90";
+            settings["client.headbob"] = "False";
+            settings["client.crosshair"] = "True";
+            settings["client.hitcross"] = "True";
+            settings["gametip.showgametips"] = "False";
+            settings["client.hurtpunch"] = "False";
+            settings["effects.maxgibs"] = "1";
+            settings["rgbeffects.enabled"] = "False";
+            settings["rgbeffects.brightness"] = "0";
+
+            settings["fps.limit"] = displayMode.RefreshRate.ToString();
+            settings["graphics.vsync"] = "False";
+            settings["fps.limitinmenu"] = "True";
+            settings["fps.limitinbackground"] = "True";
+
+            settings["graphics.renderscale"] = "1";
+            settings["graphics.shaderlod"] = "200";
+            settings["graphics.drawdistance"] = "1000";
+            settings["water.reflections"] = "2";
+            settings["water.quality"] = "0";
+            settings["graphics.grassshadows"] = "False";
+            settings["grass.displacement"] = "True";
+            settings["graphics.af"] = "1";
+            settings["graphics.parallax"] = "0";
+
+            settings["graphics.shadowquality"] = "0";
+            settings["graphics.shadowmode"] = "1";
+            settings["graphics.shadowcascades"] = "0";
+            settings["graphics.shadowdistance"] = "0";
+            settings["graphics.shadowlights"] = "0";
+
+            settings["decor.quality"] = "0";
+            settings["grass.quality"] = "0";
+            settings["terrain.quality"] = "0";
+            settings["tree.meshes"] = "10";
+            settings["tree.quality"] = "100";
+            settings["mesh.quality"] = "100";
+            settings["graphics.lodbias"] = "1";
+            settings["particle.quality"] = "0";
+
+            if (HardwareDetector.IsNvidiaGpu())
+            {
+                settings["graphics.dlss"] = "2";
+                settings["effects.antialiasing"] = "0";
+            }
+            else
+            {
+                settings["graphics.dlss"] = "-1";
+                settings["effects.antialiasing"] = "3";
+            }
+            settings["effects.bloom"] = "False";
+            settings["effects.ao"] = "False";
+            settings["effects.sharpen"] = "True";
+            settings["effects.vignet"] = "False";
+            settings["graphics.dof"] = "False";
+            settings["effects.lensdirt"] = "False";
+            settings["effects.motionblur"] = "False";
+            settings["effects.shafts"] = "False";
+            settings["global.showblood"] = "False";
+
+            settings["culling.env"] = "False";
+            settings["graphics.contactshadows"] = "False";
+            settings["gc.buffer"] = "4085";
+        }
+
+        public static Dictionary<string, string> GetPvpGuideShortcuts()
+        {
+            return new Dictionary<string, string>
+            {
+                ["graphics.vm_fov_scale"] = "False",
+                ["graphics.vm_horizontal_flip"] = "True",
+                ["client.clampscreenshake"] = "True",
+                ["hitnotify.notification_level"] = "2",
+                ["legs.enablelegs"] = "0",
+                ["effects.showoutlines"] = "True"
+            };
+        }
+
+        public static Dictionary<string, string> GetPvpGuideBindings()
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["c"] = "+graphics.fov 90;graphics.fov 70",
+                ["f1"] = "client.consoletoggle;combatlog;client.ping",
+                ["l"] = "~meta.exec \"client.lookatradius 0\" \"chat.add 0 0 MIN\";meta.exec \"client.lookatradius 0.2\" \"chat.add 0 0 DEFAULT\";meta.exec \"client.lookatradius 10\" \"chat.add 0 0 MAX\"",
+                ["y"] = "forward;sprint"
+            };
         }
         /// <summary>
         /// Plays a Toilet Flush sound
