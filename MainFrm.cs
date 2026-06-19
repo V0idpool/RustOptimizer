@@ -9,6 +9,8 @@ namespace RustOptimizer
     {
         public static MainFrm Instance { get; private set; }
         private RustConfig rustConfig = new RustConfig();
+        private string CurrentGameConfigPath => UserConfigs.GetGameConfigPath(gamePathString.Text.Trim());
+        private string CurrentKeysConfigPath => UserConfigs.GetKeysConfigPath(gamePathString.Text.Trim());
         public System.Windows.Forms.Timer autoFlushTimer;
         public NotifyIcon sysTrayIcon;
         public MainFrm()
@@ -73,6 +75,7 @@ namespace RustOptimizer
 
                 autoFlushChk.Checked = UserConfigs.AutoFlushEnabled;
                 highPriority.Checked = UserConfigs.CPUHighPriority;
+                pvpGuideShortcuts.Checked = UserConfigs.PvpGuideShortcuts;
                 Optimizer.SetPriority(UserConfigs.CPUHighPriority);
 
                 autoFlushSound.Checked = UserConfigs.AutoFlushSfx;
@@ -212,11 +215,34 @@ namespace RustOptimizer
         /// </summary>
         private void optimizeBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(gamePathString.Text) || !Directory.Exists(gamePathString.Text))
+            string gamePath = gamePathString.Text.Trim();
+            if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath))
             {
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
+            if (Process.GetProcessesByName("RustClient").Length > 0 || Process.GetProcessesByName("Rust").Length > 0)
+            {
+                MessageBox.Show(
+                    "Close Rust before applying a profile so the game does not overwrite client.cfg or keys.cfg.",
+                    "Rust Is Running",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            string clientConfigPath = UserConfigs.GetGameConfigPath(gamePath);
+            if (!File.Exists(clientConfigPath))
+            {
+                MessageBox.Show(
+                    $"Rust's client.cfg was not found at:\n{clientConfigPath}\n\nSelect the main Rust installation folder, not the folder containing RustOptimizer.exe.",
+                    "Rust Config Not Found",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
+
             string profile = profileDropdown.SelectedItem?.ToString();
             if (string.IsNullOrEmpty(profile))
             {
@@ -224,24 +250,47 @@ namespace RustOptimizer
                 return;
             }
 
-            rustConfig.LoadSettings(UserConfigs.GameConfigPath);
-
-            var optimalSettings = Optimizer.GetOptimalSettings(profile);
-
-            foreach (var setting in optimalSettings)
+            try
             {
-                rustConfig.SetSetting(setting.Key, setting.Value);
-            }
+                rustConfig.LoadSettings(clientConfigPath);
 
-            rustConfig.SaveSettings(UserConfigs.GameConfigPath);
-            MessageBox.Show($"'{profile}' profile applied successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var optimalSettings = Optimizer.GetOptimalSettings(profile);
+                foreach (var setting in optimalSettings)
+                {
+                    rustConfig.SetSetting(setting.Key, setting.Value);
+                }
+
+                if (pvpGuideShortcuts.Checked)
+                {
+                    foreach (var shortcut in Optimizer.GetPvpGuideShortcuts())
+                    {
+                        rustConfig.SetSetting(shortcut.Key, shortcut.Value);
+                    }
+                }
+
+                rustConfig.SaveSettings(clientConfigPath);
+
+                if (pvpGuideShortcuts.Checked)
+                {
+                    RustKeyConfig.ApplyBindings(CurrentKeysConfigPath, Optimizer.GetPvpGuideBindings());
+                }
+
+                UserConfigs.GamePath = gamePath;
+                string shortcutStatus = pvpGuideShortcuts.Checked ? " Guide shortcuts were also enabled." : string.Empty;
+                MessageBox.Show($"'{profile}' profile applied successfully!{shortcutStatus}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogError(ex);
+                MessageBox.Show($"Unable to apply the profile:\n{ex.Message}", "Optimization Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         /// <summary>
         /// Creates a backup of the current client.cfg file, named with a timestamp, and adds it to the list.
         /// </summary>
         private void saveBackupBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(UserConfigs.GameConfigPath))
+            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(CurrentGameConfigPath))
             {
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -251,7 +300,7 @@ namespace RustOptimizer
             string newBackupPath = Path.Combine(UserConfigs.BackupsPath, backupFolder);
 
             Directory.CreateDirectory(newBackupPath);
-            rustConfig.LoadSettings(UserConfigs.GameConfigPath);
+            rustConfig.LoadSettings(CurrentGameConfigPath);
             rustConfig.SaveSettings(Path.Combine(newBackupPath, "client.cfg"));
             MessageBox.Show("Settings backup saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             LoadBackups();
@@ -282,7 +331,7 @@ namespace RustOptimizer
                 return;
             }
 
-            File.Copy(backupConfigPath, UserConfigs.GameConfigPath, true);
+            File.Copy(backupConfigPath, CurrentGameConfigPath, true);
             MessageBox.Show("Settings restored successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         /// <summary>
@@ -324,7 +373,7 @@ namespace RustOptimizer
 
                     try
                     {
-                        File.Copy(backupConfigPath, UserConfigs.GameConfigPath, true);
+                        File.Copy(backupConfigPath, CurrentGameConfigPath, true);
                         MessageBox.Show("Settings restored successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
@@ -340,7 +389,7 @@ namespace RustOptimizer
         /// </summary>
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(UserConfigs.GameConfigPath))
+            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(CurrentGameConfigPath))
             {
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -348,7 +397,7 @@ namespace RustOptimizer
             string backupFolder = "Backup-" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
             string newBackupPath = Path.Combine(UserConfigs.BackupsPath, backupFolder);
             Directory.CreateDirectory(newBackupPath);
-            File.Copy(UserConfigs.GameConfigPath, Path.Combine(newBackupPath, "client.cfg"));
+            File.Copy(CurrentGameConfigPath, Path.Combine(newBackupPath, "client.cfg"));
             MessageBox.Show("Settings backup saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             LoadBackups();
         }
@@ -393,7 +442,7 @@ namespace RustOptimizer
 
             try
             {
-                Helpers.EmbedResources.SaveToDisk("client.cfg", UserConfigs.GameConfigPath);
+                Helpers.EmbedResources.SaveToDisk("client.cfg", CurrentGameConfigPath);
                 MessageBox.Show("Default settings restored successfully! Restart your game for changes to take effect.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -469,7 +518,7 @@ namespace RustOptimizer
         /// </summary>
         private void exportProfileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(UserConfigs.GameConfigPath))
+            if (string.IsNullOrEmpty(gamePathString.Text) || !File.Exists(CurrentGameConfigPath))
             {
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -485,7 +534,7 @@ namespace RustOptimizer
                 {
                     try
                     {
-                        File.Copy(UserConfigs.GameConfigPath, sfd.FileName, true);
+                        File.Copy(CurrentGameConfigPath, sfd.FileName, true);
                         MessageBox.Show("Profile exported successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
@@ -516,7 +565,7 @@ namespace RustOptimizer
                 {
                     try
                     {
-                        File.Copy(ofd.FileName, UserConfigs.GameConfigPath, true);
+                        File.Copy(ofd.FileName, CurrentGameConfigPath, true);
                         MessageBox.Show("Profile imported successfully! Restart your game for changes to take effect.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         var result = MessageBox.Show("Would you like to save this imported profile as a new backup?", "Save as Backup", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -550,6 +599,7 @@ namespace RustOptimizer
             ini.WriteValue("AppSettings", "FlushUnit", autoFlushMinHour.Text, ini.Path);
             ini.WriteValue("AppSettings", "FlushSound", autoFlushSound.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
             ini.WriteValue("AppSettings", "CPUHighPriority", highPriority.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
+            ini.WriteValue("AppSettings", "PvpGuideShortcuts", pvpGuideShortcuts.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
             UserConfigs.Refresh();
             Optimizer.InitializeAutoFlushTimer();
             Optimizer.SetPriority(highPriority.Checked);

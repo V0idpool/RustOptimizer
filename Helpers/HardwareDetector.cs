@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -12,6 +13,84 @@ namespace RustOptimizer.Helpers
 {
     public static class HardwareDetector
     {
+        private const int EnumCurrentSettings = -1;
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DevMode devMode);
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        private struct DevMode
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string DeviceName;
+            public ushort SpecVersion;
+            public ushort DriverVersion;
+            public ushort Size;
+            public ushort DriverExtra;
+            public uint Fields;
+            public int PositionX;
+            public int PositionY;
+            public uint DisplayOrientation;
+            public uint DisplayFixedOutput;
+            public short Color;
+            public short Duplex;
+            public short YResolution;
+            public short TTOption;
+            public short Collate;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string FormName;
+            public ushort LogPixels;
+            public uint BitsPerPixel;
+            public uint PelsWidth;
+            public uint PelsHeight;
+            public uint DisplayFlags;
+            public uint DisplayFrequency;
+            public uint ICMMethod;
+            public uint ICMIntent;
+            public uint MediaType;
+            public uint DitherType;
+            public uint Reserved1;
+            public uint Reserved2;
+            public uint PanningWidth;
+            public uint PanningHeight;
+        }
+
+        public static (int Width, int Height, int RefreshRate) GetPrimaryDisplayMode()
+        {
+            Screen? primaryScreen = Screen.PrimaryScreen;
+            int width = primaryScreen?.Bounds.Width ?? 1920;
+            int height = primaryScreen?.Bounds.Height ?? 1080;
+            int refreshRate = 60;
+
+            if (primaryScreen == null)
+            {
+                return (width, height, refreshRate);
+            }
+
+            DevMode mode = new DevMode
+            {
+                DeviceName = string.Empty,
+                FormName = string.Empty,
+                Size = (ushort)Marshal.SizeOf<DevMode>()
+            };
+
+            if (EnumDisplaySettings(primaryScreen.DeviceName, EnumCurrentSettings, ref mode))
+            {
+                width = mode.PelsWidth > 0 ? (int)mode.PelsWidth : width;
+                height = mode.PelsHeight > 0 ? (int)mode.PelsHeight : height;
+                refreshRate = mode.DisplayFrequency > 1 ? (int)mode.DisplayFrequency : refreshRate;
+            }
+
+            return (width, height, refreshRate);
+        }
+
+        public static bool IsNvidiaGpu()
+        {
+            string gpuName = GetGpuName();
+            return gpuName.Contains("NVIDIA", StringComparison.OrdinalIgnoreCase)
+                || gpuName.Contains("GeForce", StringComparison.OrdinalIgnoreCase);
+        }
+
         /// <summary>
         /// Grabs the name of the CPU from your system info.
         /// </summary>

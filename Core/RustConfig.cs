@@ -19,6 +19,8 @@ namespace RustOptimizer.Core
         /// </summary>
         public void LoadSettings(string filePath)
         {
+            settings.Clear();
+
             if (File.Exists(filePath))
             {
                 foreach (string line in File.ReadAllLines(filePath))
@@ -28,11 +30,27 @@ namespace RustOptimizer.Core
                         continue;
                     }
 
-                    string[] parts = line.Split(new char[] { ' ' }, 2);
+                    string[] parts = line.Split(new char[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 2)
                     {
                         string key = parts[0].Trim();
-                        string value = parts[1].Trim().Trim('"');
+                        string value = parts[1].Trim();
+
+                        // Bind entries have a second key component (for example, "input.bind c").
+                        // Keeping it in the dictionary key prevents different binds overwriting each other.
+                        if (key.Equals("input.bind", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string[] bindParts = value.Split(new char[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                            if (bindParts.Length != 2)
+                            {
+                                continue;
+                            }
+
+                            key = $"{key} {bindParts[0]}";
+                            value = bindParts[1];
+                        }
+
+                        value = Unquote(value);
                         settings[key] = value;
                     }
                 }
@@ -53,9 +71,24 @@ namespace RustOptimizer.Core
             {
                 foreach (var kvp in settings)
                 {
-                    writer.WriteLine($"{kvp.Key} \"{kvp.Value}\"");
+                    writer.WriteLine($"{kvp.Key} \"{EscapeValue(kvp.Value)}\"");
                 }
             }
+        }
+
+        private static string Unquote(string value)
+        {
+            if (value.Length >= 2 && value[0] == '"' && value[^1] == '"')
+            {
+                value = value.Substring(1, value.Length - 2);
+            }
+
+            return value.Replace("\\\"", "\"");
+        }
+
+        private static string EscapeValue(string value)
+        {
+            return value.Replace("\"", "\\\"");
         }
         /// <summary>
         /// Tries to get a specific setting from the loaded settings.

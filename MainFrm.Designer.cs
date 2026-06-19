@@ -76,6 +76,7 @@
             tabPage2 = new TabPage();
             nsLabel10 = new GUI.NSLabel();
             highPriority = new GUI.NSCheckBox();
+            pvpGuideShortcuts = new GUI.NSCheckBox();
             tabPage1 = new TabPage();
             nsLabel7 = new GUI.NSLabel();
             autoFlushChk = new GUI.NSCheckBox();
@@ -299,7 +300,7 @@
             profileDropdown.DropDownStyle = ComboBoxStyle.DropDownList;
             profileDropdown.ForeColor = Color.White;
             profileDropdown.FormattingEnabled = true;
-            profileDropdown.Items.AddRange(new object[] { "Competitive (Max FPS)", "Balanced (Good-looking & Fast)", "Recommended (Optimized)", "Ultra (Maximum Visuals)" });
+            profileDropdown.Items.AddRange(new object[] { "Competitive (Max FPS)", "PvP (Steam Guide 2026)", "Balanced (Good-looking & Fast)", "Recommended (Optimized)", "Ultra (Maximum Visuals)" });
             profileDropdown.Location = new Point(71, 54);
             profileDropdown.Name = "profileDropdown";
             profileDropdown.Size = new Size(224, 24);
@@ -526,6 +527,7 @@
             // tabPage2
             // 
             tabPage2.BackColor = Color.FromArgb(0, 0, 0);
+            tabPage2.Controls.Add(pvpGuideShortcuts);
             tabPage2.Controls.Add(nsLabel10);
             tabPage2.Controls.Add(highPriority);
             tabPage2.Location = new Point(119, 4);
@@ -554,6 +556,15 @@
             highPriority.Size = new Size(120, 23);
             highPriority.TabIndex = 13;
             highPriority.Text = "Enable/Disable";
+            //
+            // pvpGuideShortcuts
+            //
+            pvpGuideShortcuts.Checked = false;
+            pvpGuideShortcuts.Location = new Point(6, 42);
+            pvpGuideShortcuts.Name = "pvpGuideShortcuts";
+            pvpGuideShortcuts.Size = new Size(260, 23);
+            pvpGuideShortcuts.TabIndex = 15;
+            pvpGuideShortcuts.Text = "Enable guide in-game shortcuts";
             // 
             // tabPage1
             // 
@@ -787,6 +798,7 @@
         public GUI.NSCheckBox autoFlushChk;
         private GUI.NSLabel nsLabel10;
         public GUI.NSCheckBox highPriority;
+        private GUI.NSCheckBox pvpGuideShortcuts;
         private ToolStripMenuItem minimizeToTrayToolStripMenuItem;
         private GUI.NSButton launchRustBtn;
         private GUI.NSTabControl nsTabControl1;
