@@ -7,6 +7,12 @@ namespace RustOptimizer.Helpers
         public static void SaveToDisk(string resourceName, string fileName)
         {
             var assy = Assembly.GetExecutingAssembly();
+            string? directory = Path.GetDirectoryName(fileName);
+
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
             foreach (string resource in assy.GetManifestResourceNames())
             {

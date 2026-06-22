@@ -192,9 +192,9 @@ namespace RustOptimizer
 
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
                 {
-                    gamePathString.Text = fbd.SelectedPath;
-                    ini.WriteValue("AppSettings", "GamePath", fbd.SelectedPath, ini.Path);
-                    UserConfigs.Refresh();
+                    UserConfigs.SetGamePath(fbd.SelectedPath);
+                    gamePathString.Text = UserConfigs.GamePath;
+                    ini.WriteValue("AppSettings", "GamePath", UserConfigs.GamePath, ini.Path);
                 }
             }
         }
@@ -212,7 +212,10 @@ namespace RustOptimizer
         /// </summary>
         private void optimizeBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(gamePathString.Text) || !Directory.Exists(gamePathString.Text))
+            UserConfigs.SetGamePath(gamePathString.Text);
+            gamePathString.Text = UserConfigs.GamePath;
+
+            if (string.IsNullOrEmpty(UserConfigs.GamePath) || !Directory.Exists(UserConfigs.GamePath))
             {
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -282,6 +285,9 @@ namespace RustOptimizer
                 return;
             }
 
+            UserConfigs.EnsureGameConfigDirectory();
+
+
             File.Copy(backupConfigPath, UserConfigs.GameConfigPath, true);
             MessageBox.Show("Settings restored successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -324,6 +330,8 @@ namespace RustOptimizer
 
                     try
                     {
+                        UserConfigs.EnsureGameConfigDirectory();
+
                         File.Copy(backupConfigPath, UserConfigs.GameConfigPath, true);
                         MessageBox.Show("Settings restored successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
@@ -516,6 +524,8 @@ namespace RustOptimizer
                 {
                     try
                     {
+                        UserConfigs.EnsureGameConfigDirectory();
+
                         File.Copy(ofd.FileName, UserConfigs.GameConfigPath, true);
                         MessageBox.Show("Profile imported successfully! Restart your game for changes to take effect.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -543,7 +553,10 @@ namespace RustOptimizer
         {
             var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
 
-            ini.WriteValue("AppSettings", "GamePath", gamePathString.Text, ini.Path);
+            UserConfigs.SetGamePath(gamePathString.Text);
+            gamePathString.Text = UserConfigs.GamePath;
+
+            ini.WriteValue("AppSettings", "GamePath", UserConfigs.GamePath, ini.Path);
             ini.WriteValue("AppSettings", "Profile", profileDropdown.Text, ini.Path);
             ini.WriteValue("AppSettings", "AutoFlush", autoFlushChk.Checked.ToString(), ini.Path);
             ini.WriteValue("AppSettings", "FlushInterval", autoFlushinterval.Value.ToString(CultureInfo.InvariantCulture), ini.Path);

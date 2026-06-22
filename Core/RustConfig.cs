@@ -44,6 +44,13 @@ namespace RustOptimizer.Core
         /// </summary>
         public void SaveSettings(string filePath)
         {
+            string? directory = Path.GetDirectoryName(filePath);
+
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
             if (File.Exists(filePath))
             {
                 File.Copy(filePath, filePath + ".bak", true);
