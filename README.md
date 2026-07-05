@@ -1,13 +1,20 @@
 # RustOptimizer
 <img width="999" height="514" alt="unnamed" src="https://github.com/user-attachments/assets/83beac24-7023-4642-9e07-530a14b6aeb8" />
 
-**RustOptimizer** is a simple, easy-to-use tool designed to help you optimize your Rust game settings for the best possible performance. Whether you're aiming for maximum frames per second (FPS) or a balance of visuals and speed, RustOptimizer helps you get your game running smoothly with just a few clicks.
+**RustOptimizer** is a lightweight, open-source Optimization Tool designed specifically to fix Rust's memory leaks and config issues so you can focus on the wipe. Maximize your FPS today!
+
+---
+
+### Official Site
+[https://rustoptimizer.voidtech.xyz](https://rustoptimizer.voidtech.xyz)
 
 ---
 
 ### Features
 
 * **Hardware Auto-Detection:** Automatically detects your CPU, GPU, and RAM to recommend an optimal profile for your system.
+* **Smart RAM Flushing:** Automatically clears the Windows Standby Memory list at user-defined intervals to prevent the infamous "memory leak" stuttering that occurs during long play sessions.
+* **CPU Priority Override:** Actively monitors for `RustClient.exe` and applies a High Priority flag, ensuring your CPU resources are dedicated to the game over background Windows tasks.
 * **Optimization Profiles:** Choose from a list of pre-configured settings tailored for different goals:
     * **Competitive (Maximum FPS):** Strips down visuals for the highest possible frame rates.
     * **Balanced (Good Performance & Looks):** A great mix of graphical fidelity and performance.
@@ -24,7 +31,7 @@
 ### How to Use
 
 ## **(Use SAVE BACKUP, to make a back-up of your settings to ensure you can revert back to your settings)**
-
+**Note:** To utilize features like **RAM Flushing** and **CPU Priority Override**, you must run the application as **Administrator**.
 1.  **Download:** Get the latest version of RustOptimizer from the GitHub releases page.
 2.  **Run the application.**
 3.  **Set Game Path:** Click "**Open...**" and select your main Rust game directory (e.g., `C:\Program Files (x86)\Steam\steamapps\common\Rust`).
@@ -38,6 +45,7 @@
 
 ### Useful Links
 
-* **Download:** [https://www.nexusmods.com/rust/mods/5](https://www.nexusmods.com/rust/mods/5)
-* **Support:** [https://discord.gg/R4bR9JwAfv](https://discord.gg/R4bR9JwAfv)
+* **Official Site:** [https://rustoptimizer.voidtech.xyz](https://rustoptimizer.voidtech.xyz)
+* **Downloads:** [https://rustoptimizer.voidtech.xyz/downloads](https://rustoptimizer.voidtech.xyz/downloads)
+* **Support:** [https://discord.gg/tfwf9Qr7rG](https://discord.gg/tfwf9Qr7rG)
 * **Donations:** [https://buymeacoffee.com/rustforgedev](https://buymeacoffee.com/rustforgedev)
