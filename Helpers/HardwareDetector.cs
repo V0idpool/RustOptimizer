@@ -41,86 +41,6 @@ namespace RustOptimizer.Helpers
             return 0.0;
         }
         /// <summary>
-        /// Gets the user-friendly name of the discrete graphics card (GPU) with the highest VRAM.
-        /// </summary>
-        public static string GetGpuName()
-        {
-            string bestGpuName = "N/A";
-            long maxVramBytes = 0;
-
-            try
-            {
-                // Open the Display Adapters registry key
-                using (RegistryKey classKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"))
-                {
-                    if (classKey != null)
-                    {
-                        foreach (string subKeyName in classKey.GetSubKeyNames())
-                        {
-                            if (int.TryParse(subKeyName, out _))
-                            {
-                                using (RegistryKey adapterKey = classKey.OpenSubKey(subKeyName))
-                                {
-                                    if (adapterKey != null)
-                                    {
-                                        // Check both 64-bit and 32-bit memory keys
-                                        object memObj = adapterKey.GetValue("HardwareInformation.qwMemorySize")
-                                                     ?? adapterKey.GetValue("HardwareInformation.MemorySize");
-
-                                        object descObj = adapterKey.GetValue("DriverDesc");
-
-                                        if (memObj != null && descObj != null)
-                                        {
-                                            long vramBytes = Convert.ToInt64(memObj);
-
-                                            // Handle potential negative values if stored as signed 32-bit
-                                            if (vramBytes < 0)
-                                            {
-                                                vramBytes = (long)(uint)Convert.ToInt32(memObj);
-                                            }
-
-                                            // If this adapter has more VRAM, it's the dedicated GPU. Save its name.
-                                            if (vramBytes >= maxVramBytes)
-                                            {
-                                                maxVramBytes = vramBytes;
-                                                bestGpuName = descObj.ToString();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error getting GPU Name from registry: {ex.Message}");
-            }
-
-            // Direct fallback to WMI if the registry doesn't return anything valid
-            if (bestGpuName == "N/A")
-            {
-                try
-                {
-                    using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_VideoController"))
-                    {
-                        foreach (ManagementObject obj in searcher.Get())
-                        {
-                            if (obj["Name"] != null)
-                            {
-                                bestGpuName = obj["Name"].ToString();
-                                break;
-                            }
-                        }
-                    }
-                }
-                catch { }
-            }
-
-            return Regex.Replace(bestGpuName, @"\(.*\)", "").Trim();
-        }
-        /// <summary>
         /// Gets the total amount of RAM you have installed, in gigabytes.
         /// </summary>
         public static double GetTotalMemoryInGB()
@@ -241,8 +161,92 @@ namespace RustOptimizer.Helpers
             }
         }
         /// <summary>
+        /// Gets the user-friendly name of the discrete graphics card (GPU) with the highest VRAM.
+        /// Ignores virtual displays and software adapters.
+        /// </summary>
+        public static string GetGpuName()
+        {
+            string bestGpuName = "N/A";
+            long maxVramBytes = 0;
+
+            try
+            {
+                using (RegistryKey classKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"))
+                {
+                    if (classKey != null)
+                    {
+                        foreach (string subKeyName in classKey.GetSubKeyNames())
+                        {
+                            if (int.TryParse(subKeyName, out _))
+                            {
+                                using (RegistryKey adapterKey = classKey.OpenSubKey(subKeyName))
+                                {
+                                    if (adapterKey != null)
+                                    {
+                                        object descObj = adapterKey.GetValue("DriverDesc");
+                                        if (descObj == null) continue;
+
+                                        string desc = descObj.ToString();
+                                        string lowerDesc = desc.ToLower();
+
+                                        // Skip known virtual/software adapters
+                                        if (lowerDesc.Contains("virtual") || lowerDesc.Contains("remote") ||
+                                            lowerDesc.Contains("microsoft basic") || lowerDesc.Contains("citrix") ||
+                                            lowerDesc.Contains("mirage") || lowerDesc.Contains("spacedesk"))
+                                        {
+                                            continue;
+                                        }
+
+                                        object memObj = adapterKey.GetValue("HardwareInformation.qwMemorySize")
+                                                     ?? adapterKey.GetValue("HardwareInformation.MemorySize");
+
+                                        if (memObj != null)
+                                        {
+                                            long vramBytes = ParseRegistryMemory(memObj);
+
+                                            if (vramBytes >= maxVramBytes)
+                                            {
+                                                maxVramBytes = vramBytes;
+                                                bestGpuName = desc;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting GPU Name from registry: {ex.Message}");
+            }
+
+            // Direct fallback to WMI if the registry doesn't return anything valid
+            if (bestGpuName == "N/A")
+            {
+                try
+                {
+                    using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_VideoController"))
+                    {
+                        foreach (ManagementObject obj in searcher.Get())
+                        {
+                            if (obj["Name"] != null)
+                            {
+                                bestGpuName = obj["Name"].ToString();
+                                break;
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            return Regex.Replace(bestGpuName, @"\(.*\)", "").Trim();
+        }
+
+        /// <summary>
         /// Tries to get the amount of VRAM (video memory) from the Windows Registry.
-        /// Iterates through all display adapters and returns the one with the most VRAM.
         /// </summary>
         public static double GetGpuVramInGB()
         {
@@ -262,20 +266,22 @@ namespace RustOptimizer.Helpers
                                 {
                                     if (adapterKey != null)
                                     {
-                                        // Check for 64-bit QWORD first, then fallback to 32-bit DWORD
+                                        object descObj = adapterKey.GetValue("DriverDesc");
+                                        if (descObj != null)
+                                        {
+                                            string lowerDesc = descObj.ToString().ToLower();
+                                            if (lowerDesc.Contains("virtual") || lowerDesc.Contains("remote") || lowerDesc.Contains("microsoft basic"))
+                                            {
+                                                continue;
+                                            }
+                                        }
+
                                         object memObj = adapterKey.GetValue("HardwareInformation.qwMemorySize")
                                                      ?? adapterKey.GetValue("HardwareInformation.MemorySize");
 
                                         if (memObj != null)
                                         {
-                                            long vramBytes = Convert.ToInt64(memObj);
-
-                                            // Fix for 32-bit unsigned integers being incorrectly cast as negative signed longs
-                                            if (vramBytes < 0)
-                                            {
-                                                vramBytes = (long)(uint)Convert.ToInt32(memObj);
-                                            }
-
+                                            long vramBytes = ParseRegistryMemory(memObj);
                                             double vramGb = vramBytes / (1024.0 * 1024.0 * 1024.0);
 
                                             if (vramGb > maxVramGb)
@@ -296,6 +302,41 @@ namespace RustOptimizer.Helpers
             }
 
             return Math.Round(maxVramGb, 1);
+        }
+
+        /// <summary>
+        /// Safely parses registry memory values whether they are stored as integers, longs, or binary byte arrays.
+        /// </summary>
+        private static long ParseRegistryMemory(object memObj)
+        {
+            if (memObj == null) return 0;
+
+            // Nvidia often stores memory size as REG_BINARY (byte array)
+            if (memObj is byte[] bytes)
+            {
+                if (bytes.Length == 8)
+                    return BitConverter.ToInt64(bytes, 0);
+                else if (bytes.Length == 4)
+                    return BitConverter.ToUInt32(bytes, 0);
+                else
+                    return 0;
+            }
+
+            try
+            {
+                long vramBytes = Convert.ToInt64(memObj);
+
+                // Fix for 32-bit unsigned integers being incorrectly cast as negative signed longs
+                if (vramBytes < 0)
+                {
+                    vramBytes = (long)(uint)Convert.ToInt32(memObj);
+                }
+                return vramBytes;
+            }
+            catch
+            {
+                return 0;
+            }
         }
     }
 }

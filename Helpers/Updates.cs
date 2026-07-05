@@ -9,8 +9,8 @@ namespace RustOptimizer.Helpers
 {
     public class Updates
     {
-        private const string VersionUrl = "https://raw.githubusercontent.com/V0idpool/RustOptimizer/refs/heads/main/version.txt";
-        private const string NexusModsUrl = "https://www.nexusmods.com/rust/mods/5?tab=files";
+        private const string VersionUrl = "https://rustoptimizer.voidtech.xyz/download/official/version.txt";
+        private const string DownloadUrl = "https://rustoptimizer.voidtech.xyz/downloads";
 
         public static async Task CheckForUpdates()
         {
@@ -20,6 +20,7 @@ namespace RustOptimizer.Helpers
 
                 using (HttpClient client = new HttpClient())
                 {
+                    client.Timeout = TimeSpan.FromSeconds(10);
                     client.DefaultRequestHeaders.Add("User-Agent", "RustOptimizer-UpdateClient");
                     string fetchedVersionStr = await client.GetStringAsync(VersionUrl);
                     fetchedVersionStr = fetchedVersionStr.Trim();
@@ -29,7 +30,7 @@ namespace RustOptimizer.Helpers
                         if (onlineVersion > currentVersion)
                         {
                             DialogResult result = MessageBox.Show(
-                                $"A new update for Rust Optimizer is available!\n\nCurrent Version: {currentVersion}\nLatest Version: {onlineVersion}\n\nWould you like to open NexusMods to download it?",
+                                $"A new update for Rust Optimizer is available!\n\nCurrent Version: {currentVersion}\nLatest Version: {onlineVersion}\n\nWould you like to open the website to download the latest version?",
                                 "Update Available",
                                 MessageBoxButtons.OKCancel,
                                 MessageBoxIcon.Information
@@ -39,7 +40,7 @@ namespace RustOptimizer.Helpers
                             {
                                 Process.Start(new ProcessStartInfo
                                 {
-                                    FileName = NexusModsUrl,
+                                    FileName = DownloadUrl,
                                     UseShellExecute = true
                                 });
                             }

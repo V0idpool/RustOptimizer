@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace RustOptimizer.Core
 {
@@ -40,6 +41,8 @@ namespace RustOptimizer.Core
             public LUID Luid;
             public uint Attributes;
         }
+        private static System.Timers.Timer PriorityTimer;
+        private static bool WantsHighPriority = false;
 
         /// <summary>
         /// This method gets the right settings for a specific profile, like Competitive or Ultra.
@@ -336,14 +339,45 @@ namespace RustOptimizer.Core
         /// </summary>
         public static void SetPriority(bool high)
         {
+            WantsHighPriority = high;
+
+            if (PriorityTimer == null)
+            {
+                PriorityTimer = new System.Timers.Timer();
+                PriorityTimer.Interval = 5000;
+                PriorityTimer.Elapsed += ActivePriorityCheck;
+                PriorityTimer.Start();
+            }
+
+            ActivePriorityCheck(null, null);
+        }
+
+        /// <summary>
+        /// Actively monitors for RustClient.exe and applies the desired priority.
+        /// </summary>
+        private static void ActivePriorityCheck(object sender, ElapsedEventArgs e)
+        {
             try
             {
                 Process[] rustProcesses = Process.GetProcessesByName("RustClient");
 
                 foreach (Process p in rustProcesses)
                 {
-                    p.PriorityClass = high ? ProcessPriorityClass.High : ProcessPriorityClass.Normal;
+                    ProcessPriorityClass targetPriority = WantsHighPriority ? ProcessPriorityClass.High : ProcessPriorityClass.Normal;
+
+                    if (p.PriorityClass != targetPriority)
+                    {
+                        p.PriorityClass = targetPriority;
+                    }
                 }
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // Catch "Access Denied" errors silently, this stops the background thread from crashing or spamming your log file.
+            }
+            catch (InvalidOperationException)
+            {
+                // Silently catch if the game closes while the loop is checking it.
             }
             catch (Exception ex)
             {

@@ -29,17 +29,19 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
-            nsGroupBox1 = new GUI.NSGroupBox();
+            nsGroupBox1 = new GUI.ROGroupBox();
             infoText = new RichTextBox();
             nsGroupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // nsGroupBox1
             // 
+            nsGroupBox1.BackColor = Color.Transparent;
             nsGroupBox1.Controls.Add(infoText);
-            nsGroupBox1.DrawSeperator = false;
+            nsGroupBox1.Font = new Font("Segoe UI", 10F);
             nsGroupBox1.Location = new Point(12, 12);
             nsGroupBox1.Name = "nsGroupBox1";
+            nsGroupBox1.Padding = new Padding(10, 45, 10, 10);
             nsGroupBox1.Size = new Size(493, 329);
             nsGroupBox1.SubTitle = "";
             nsGroupBox1.TabIndex = 0;
@@ -48,9 +50,9 @@
             // 
             // infoText
             // 
-            infoText.BackColor = Color.Black;
+            infoText.BackColor = Color.FromArgb(40, 40, 40);
             infoText.BorderStyle = BorderStyle.None;
-            infoText.Location = new Point(14, 29);
+            infoText.Location = new Point(14, 38);
             infoText.Name = "infoText";
             infoText.Size = new Size(464, 281);
             infoText.TabIndex = 0;
@@ -77,6 +79,6 @@
 
         #endregion
         private RichTextBox infoText;
-        public GUI.NSGroupBox nsGroupBox1;
+        public GUI.ROGroupBox nsGroupBox1;
     }
 }

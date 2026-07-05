@@ -26,13 +26,11 @@ namespace RustOptimizer.Helpers
         {
             try
             {
-                // Append the message to the log file
                 File.AppendAllText(logFilePath, $"{DateTime.Now}: {message}{Environment.NewLine}");
             }
             catch (Exception ex)
             {
                 ExceptionHandler.LogError(ex);
-                // Handle any exceptions that may occur while writing to the log file
                 System.Diagnostics.Debug.WriteLine($"Error writing to log file: {ex.Message}");
             }
         }
@@ -40,14 +38,12 @@ namespace RustOptimizer.Helpers
         {
             if (string.IsNullOrEmpty(Path))
             {
-                MessageBox.Show("No path given" + Environment.NewLine + "Could not read Value", "No path given", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return "Error";
+                return DefaultValue;
             }
-
+            // If the file doesn't exist on first launch, silently return the DefaultValue.
             if (!File.Exists(Path))
             {
-                MessageBox.Show("File does not exist" + Environment.NewLine + "Could not read Value", "File does not exist", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return "Error";
+                return DefaultValue;
             }
 
             var sb = new System.Text.StringBuilder(BufferSize);

@@ -29,24 +29,24 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainFrm));
-            nsGroupBox1 = new GUI.NSGroupBox();
-            launchRustBtn = new GUI.NSButton();
-            nsLabel1 = new GUI.NSLabel();
+            ROGroupBox1 = new GUI.ROGroupBox();
+            launchButton1 = new GUI.LaunchButton();
+            ROLabel1 = new GUI.ROLabel();
             linkLabel2 = new LinkLabel();
-            gamePathString = new GUI.NSTextBox();
-            gamePathSelectBtn = new GUI.NSButton();
-            nsGroupBox2 = new GUI.NSGroupBox();
+            gamePathString = new GUI.ROTextBox();
+            gamePathSelectBtn = new GUI.ROButton();
+            ROGroupBox2 = new GUI.ROGroupBox();
             lblRAMInfo = new Label();
             lblGPUInfo = new Label();
             lblCPUInfo = new Label();
-            nsLabel4 = new GUI.NSLabel();
-            nsLabel3 = new GUI.NSLabel();
-            nsLabel2 = new GUI.NSLabel();
-            nsGroupBox3 = new GUI.NSGroupBox();
-            autoDetectBtn = new GUI.NSButton();
-            optimizeBtn = new GUI.NSButton();
-            nsLabel5 = new GUI.NSLabel();
-            profileDropdown = new GUI.NSComboBox();
+            ROLabel4 = new GUI.ROLabel();
+            ROLabel3 = new GUI.ROLabel();
+            ROLabel2 = new GUI.ROLabel();
+            ROGroupBox3 = new GUI.ROGroupBox();
+            autoDetectBtn = new GUI.ROButton();
+            optimizeBtn = new GUI.ROButton();
+            ROLabel5 = new GUI.ROLabel();
+            profileDropdown = new GUI.ROComboBox();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             backUpLocationToolStripMenuItem = new ToolStripMenuItem();
@@ -66,127 +66,138 @@
             donateToolStripMenuItem = new ToolStripMenuItem();
             flushRamToolStripMenuItem = new ToolStripMenuItem();
             minimizeToTrayToolStripMenuItem = new ToolStripMenuItem();
-            nsGroupBox4 = new GUI.NSGroupBox();
-            saveBackupBtn = new GUI.NSButton();
-            restoreBackupBtn = new GUI.NSButton();
-            nsLabel6 = new GUI.NSLabel();
-            backupDropdown = new GUI.NSComboBox();
-            nsGroupBox5 = new GUI.NSGroupBox();
-            nsTabControl1 = new GUI.NSTabControl();
+            ROGroupBox4 = new GUI.ROGroupBox();
+            saveBackupBtn = new GUI.ROButton();
+            restoreBackupBtn = new GUI.ROButton();
+            ROLabel6 = new GUI.ROLabel();
+            backupDropdown = new GUI.ROComboBox();
+            ROGroupBox5 = new GUI.ROGroupBox();
+            ROTabControl1 = new GUI.ROTabControl();
             tabPage2 = new TabPage();
-            nsLabel10 = new GUI.NSLabel();
-            highPriority = new GUI.NSCheckBox();
+            ROLabel10 = new GUI.ROLabel();
+            highPriority = new GUI.ROCheckBox();
             tabPage1 = new TabPage();
-            nsLabel7 = new GUI.NSLabel();
-            autoFlushChk = new GUI.NSCheckBox();
-            nsLabel9 = new GUI.NSLabel();
+            ROLabel7 = new GUI.ROLabel();
+            autoFlushChk = new GUI.ROCheckBox();
+            ROLabel9 = new GUI.ROLabel();
             autoFlushinterval = new NumericUpDown();
-            nsLabel8 = new GUI.NSLabel();
-            autoFlushMinHour = new GUI.NSComboBox();
-            autoFlushSound = new GUI.NSCheckBox();
-            nsSeperator1 = new GUI.NSSeperator();
-            saveAdvancedCfgBtn = new GUI.NSButton();
+            ROLabel8 = new GUI.ROLabel();
+            autoFlushMinHour = new GUI.ROComboBox();
+            autoFlushSound = new GUI.ROCheckBox();
+            ROSeperator1 = new GUI.ROSeperator();
+            saveAdvancedCfgBtn = new GUI.ROButton();
             linkLabel1 = new LinkLabel();
             label1 = new Label();
-            nsGroupBox1.SuspendLayout();
-            nsGroupBox2.SuspendLayout();
-            nsGroupBox3.SuspendLayout();
+            linkLabel3 = new LinkLabel();
+            ROGroupBox1.SuspendLayout();
+            ROGroupBox2.SuspendLayout();
+            ROGroupBox3.SuspendLayout();
             menuStrip1.SuspendLayout();
-            nsGroupBox4.SuspendLayout();
-            nsGroupBox5.SuspendLayout();
-            nsTabControl1.SuspendLayout();
+            ROGroupBox4.SuspendLayout();
+            ROGroupBox5.SuspendLayout();
+            ROTabControl1.SuspendLayout();
             tabPage2.SuspendLayout();
             tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)autoFlushinterval).BeginInit();
             SuspendLayout();
             // 
-            // nsGroupBox1
+            // ROGroupBox1
             // 
-            nsGroupBox1.Controls.Add(launchRustBtn);
-            nsGroupBox1.Controls.Add(nsLabel1);
-            nsGroupBox1.Controls.Add(linkLabel2);
-            nsGroupBox1.Controls.Add(gamePathString);
-            nsGroupBox1.Controls.Add(gamePathSelectBtn);
-            nsGroupBox1.DrawSeperator = false;
-            nsGroupBox1.Location = new Point(12, 37);
-            nsGroupBox1.Name = "nsGroupBox1";
-            nsGroupBox1.Size = new Size(642, 137);
-            nsGroupBox1.SubTitle = "Select the folder your game is installed in.";
-            nsGroupBox1.TabIndex = 0;
-            nsGroupBox1.Text = "nsGroupBox1";
-            nsGroupBox1.Title = "Game Path";
+            ROGroupBox1.BackColor = Color.Transparent;
+            ROGroupBox1.Controls.Add(launchButton1);
+            ROGroupBox1.Controls.Add(label1);
+            ROGroupBox1.Controls.Add(ROLabel1);
+            ROGroupBox1.Controls.Add(linkLabel1);
+            ROGroupBox1.Controls.Add(gamePathString);
+            ROGroupBox1.Controls.Add(gamePathSelectBtn);
+            ROGroupBox1.Font = new Font("Segoe UI", 10F);
+            ROGroupBox1.Location = new Point(12, 37);
+            ROGroupBox1.Name = "ROGroupBox1";
+            ROGroupBox1.Padding = new Padding(10, 45, 10, 10);
+            ROGroupBox1.Size = new Size(642, 137);
+            ROGroupBox1.SubTitle = "Select the folder your game is installed in.";
+            ROGroupBox1.TabIndex = 0;
+            ROGroupBox1.Text = "ROGroupBox1";
+            ROGroupBox1.Title = "Game Path";
             // 
-            // launchRustBtn
+            // launchButton1
             // 
-            launchRustBtn.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            launchRustBtn.Location = new Point(15, 83);
-            launchRustBtn.Name = "launchRustBtn";
-            launchRustBtn.Size = new Size(613, 40);
-            launchRustBtn.TabIndex = 15;
-            launchRustBtn.Text = "LAUNCH RUST";
-            launchRustBtn.Click += launchRustBtn_Click;
+            launchButton1.BackColor = Color.Transparent;
+            launchButton1.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
+            launchButton1.Location = new Point(15, 82);
+            launchButton1.Name = "launchButton1";
+            launchButton1.Size = new Size(613, 48);
+            launchButton1.TabIndex = 6;
+            launchButton1.Text = "LAUNCH RUST";
+            launchButton1.Click += launchButton1_Click;
             // 
-            // nsLabel1
+            // ROLabel1
             // 
-            nsLabel1.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
-            nsLabel1.Location = new Point(9, 46);
-            nsLabel1.Name = "nsLabel1";
-            nsLabel1.Size = new Size(98, 23);
-            nsLabel1.TabIndex = 3;
-            nsLabel1.Text = "nsLabel1";
-            nsLabel1.Value1 = "Game ";
-            nsLabel1.Value2 = " Path:";
+            ROLabel1.BackColor = Color.FromArgb(40, 40, 40);
+            ROLabel1.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
+            ROLabel1.Location = new Point(9, 46);
+            ROLabel1.Name = "ROLabel1";
+            ROLabel1.Size = new Size(98, 23);
+            ROLabel1.TabIndex = 3;
+            ROLabel1.Text = "ROLabel1";
+            ROLabel1.Value1 = " ";
+            ROLabel1.Value2 = " Game Path:";
             // 
             // linkLabel2
             // 
             linkLabel2.AutoSize = true;
             linkLabel2.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             linkLabel2.LinkColor = Color.Orange;
-            linkLabel2.Location = new Point(510, 7);
+            linkLabel2.Location = new Point(12, 679);
             linkLabel2.Name = "linkLabel2";
             linkLabel2.Size = new Size(125, 17);
             linkLabel2.TabIndex = 14;
             linkLabel2.TabStop = true;
-            linkLabel2.Text = "https://rustforge.us/";
+            linkLabel2.Text = "https://voidtech.xyz/";
             linkLabel2.LinkClicked += linkLabel2_LinkClicked;
             // 
             // gamePathString
             // 
+            gamePathString.BackColor = Color.Transparent;
             gamePathString.Location = new Point(113, 46);
             gamePathString.MaxLength = 32767;
             gamePathString.Multiline = false;
             gamePathString.Name = "gamePathString";
             gamePathString.ReadOnly = false;
-            gamePathString.Size = new Size(432, 23);
+            gamePathString.Size = new Size(432, 29);
             gamePathString.TabIndex = 2;
             gamePathString.TextAlign = HorizontalAlignment.Left;
             gamePathString.UseSystemPasswordChar = false;
             // 
             // gamePathSelectBtn
             // 
+            gamePathSelectBtn.BackColor = Color.Transparent;
+            gamePathSelectBtn.Font = new Font("Segoe UI", 9.5F);
             gamePathSelectBtn.Location = new Point(551, 45);
             gamePathSelectBtn.Name = "gamePathSelectBtn";
-            gamePathSelectBtn.Size = new Size(75, 23);
+            gamePathSelectBtn.Size = new Size(75, 30);
             gamePathSelectBtn.TabIndex = 0;
             gamePathSelectBtn.Text = "Open...";
             gamePathSelectBtn.Click += gamePathSelectBtn_Click;
             // 
-            // nsGroupBox2
+            // ROGroupBox2
             // 
-            nsGroupBox2.Controls.Add(lblRAMInfo);
-            nsGroupBox2.Controls.Add(lblGPUInfo);
-            nsGroupBox2.Controls.Add(lblCPUInfo);
-            nsGroupBox2.Controls.Add(nsLabel4);
-            nsGroupBox2.Controls.Add(nsLabel3);
-            nsGroupBox2.Controls.Add(nsLabel2);
-            nsGroupBox2.DrawSeperator = false;
-            nsGroupBox2.Location = new Point(12, 180);
-            nsGroupBox2.Name = "nsGroupBox2";
-            nsGroupBox2.Size = new Size(642, 144);
-            nsGroupBox2.SubTitle = "These are your hardware specs.";
-            nsGroupBox2.TabIndex = 1;
-            nsGroupBox2.Text = "nsGroupBox2";
-            nsGroupBox2.Title = "Hardware Specs";
+            ROGroupBox2.BackColor = Color.Transparent;
+            ROGroupBox2.Controls.Add(lblRAMInfo);
+            ROGroupBox2.Controls.Add(lblGPUInfo);
+            ROGroupBox2.Controls.Add(lblCPUInfo);
+            ROGroupBox2.Controls.Add(ROLabel4);
+            ROGroupBox2.Controls.Add(ROLabel3);
+            ROGroupBox2.Controls.Add(ROLabel2);
+            ROGroupBox2.Font = new Font("Segoe UI", 10F);
+            ROGroupBox2.Location = new Point(12, 180);
+            ROGroupBox2.Name = "ROGroupBox2";
+            ROGroupBox2.Padding = new Padding(10, 45, 10, 10);
+            ROGroupBox2.Size = new Size(642, 144);
+            ROGroupBox2.SubTitle = "These are your hardware specs.";
+            ROGroupBox2.TabIndex = 1;
+            ROGroupBox2.Text = "ROGroupBox2";
+            ROGroupBox2.Title = "Hardware Specs";
             // 
             // lblRAMInfo
             // 
@@ -215,98 +226,111 @@
             lblCPUInfo.Size = new Size(0, 21);
             lblCPUInfo.TabIndex = 3;
             // 
-            // nsLabel4
+            // ROLabel4
             // 
-            nsLabel4.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
-            nsLabel4.Location = new Point(9, 107);
-            nsLabel4.Name = "nsLabel4";
-            nsLabel4.Size = new Size(41, 23);
-            nsLabel4.TabIndex = 2;
-            nsLabel4.Text = "nsLabel4";
-            nsLabel4.Value1 = " ";
-            nsLabel4.Value2 = "Ram:";
+            ROLabel4.BackColor = Color.FromArgb(40, 40, 40);
+            ROLabel4.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
+            ROLabel4.Location = new Point(9, 107);
+            ROLabel4.Name = "ROLabel4";
+            ROLabel4.Size = new Size(41, 23);
+            ROLabel4.TabIndex = 2;
+            ROLabel4.Text = "ROLabel4";
+            ROLabel4.Value1 = " ";
+            ROLabel4.Value2 = "Ram:";
             // 
-            // nsLabel3
+            // ROLabel3
             // 
-            nsLabel3.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
-            nsLabel3.Location = new Point(9, 78);
-            nsLabel3.Name = "nsLabel3";
-            nsLabel3.Size = new Size(41, 23);
-            nsLabel3.TabIndex = 1;
-            nsLabel3.Text = "nsLabel3";
-            nsLabel3.Value1 = " ";
-            nsLabel3.Value2 = "GPU:";
+            ROLabel3.BackColor = Color.FromArgb(40, 40, 40);
+            ROLabel3.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
+            ROLabel3.Location = new Point(9, 78);
+            ROLabel3.Name = "ROLabel3";
+            ROLabel3.Size = new Size(41, 23);
+            ROLabel3.TabIndex = 1;
+            ROLabel3.Text = "ROLabel3";
+            ROLabel3.Value1 = " ";
+            ROLabel3.Value2 = "GPU:";
             // 
-            // nsLabel2
+            // ROLabel2
             // 
-            nsLabel2.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
-            nsLabel2.Location = new Point(9, 49);
-            nsLabel2.Name = "nsLabel2";
-            nsLabel2.Size = new Size(41, 23);
-            nsLabel2.TabIndex = 0;
-            nsLabel2.Text = "nsLabel2";
-            nsLabel2.Value1 = " ";
-            nsLabel2.Value2 = "CPU:";
+            ROLabel2.BackColor = Color.FromArgb(40, 40, 40);
+            ROLabel2.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
+            ROLabel2.Location = new Point(9, 49);
+            ROLabel2.Name = "ROLabel2";
+            ROLabel2.Size = new Size(41, 23);
+            ROLabel2.TabIndex = 0;
+            ROLabel2.Text = "ROLabel2";
+            ROLabel2.Value1 = " ";
+            ROLabel2.Value2 = "CPU:";
             // 
-            // nsGroupBox3
+            // ROGroupBox3
             // 
-            nsGroupBox3.Controls.Add(autoDetectBtn);
-            nsGroupBox3.Controls.Add(optimizeBtn);
-            nsGroupBox3.Controls.Add(nsLabel5);
-            nsGroupBox3.Controls.Add(profileDropdown);
-            nsGroupBox3.DrawSeperator = false;
-            nsGroupBox3.Location = new Point(12, 330);
-            nsGroupBox3.Name = "nsGroupBox3";
-            nsGroupBox3.Size = new Size(311, 144);
-            nsGroupBox3.SubTitle = "Select a profile to apply a set of optimized settings.";
-            nsGroupBox3.TabIndex = 2;
-            nsGroupBox3.Text = "nsGroupBox3";
-            nsGroupBox3.Title = "Optimization Profiles";
+            ROGroupBox3.BackColor = Color.Transparent;
+            ROGroupBox3.Controls.Add(autoDetectBtn);
+            ROGroupBox3.Controls.Add(optimizeBtn);
+            ROGroupBox3.Controls.Add(ROLabel5);
+            ROGroupBox3.Controls.Add(profileDropdown);
+            ROGroupBox3.Font = new Font("Segoe UI", 10F);
+            ROGroupBox3.Location = new Point(12, 330);
+            ROGroupBox3.Name = "ROGroupBox3";
+            ROGroupBox3.Padding = new Padding(10, 45, 10, 10);
+            ROGroupBox3.Size = new Size(311, 144);
+            ROGroupBox3.SubTitle = "Select a profile to apply a set of optimized settings.";
+            ROGroupBox3.TabIndex = 2;
+            ROGroupBox3.Text = "ROGroupBox3";
+            ROGroupBox3.Title = "Optimization Profiles";
             // 
             // autoDetectBtn
             // 
+            autoDetectBtn.BackColor = Color.Transparent;
+            autoDetectBtn.Font = new Font("Segoe UI", 9.5F);
             autoDetectBtn.Location = new Point(14, 102);
             autoDetectBtn.Name = "autoDetectBtn";
-            autoDetectBtn.Size = new Size(98, 23);
+            autoDetectBtn.Size = new Size(98, 30);
             autoDetectBtn.TabIndex = 7;
             autoDetectBtn.Text = "Auto-Detect...";
             autoDetectBtn.Click += autoDetectBtn_Click;
             // 
             // optimizeBtn
             // 
+            optimizeBtn.BackColor = Color.Transparent;
+            optimizeBtn.Font = new Font("Segoe UI", 9.5F);
             optimizeBtn.Location = new Point(149, 102);
             optimizeBtn.Name = "optimizeBtn";
-            optimizeBtn.Size = new Size(146, 23);
+            optimizeBtn.Size = new Size(146, 30);
             optimizeBtn.TabIndex = 4;
             optimizeBtn.Text = "Apply Optimizations...";
             optimizeBtn.Click += optimizeBtn_Click;
             // 
-            // nsLabel5
+            // ROLabel5
             // 
-            nsLabel5.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
-            nsLabel5.Location = new Point(9, 54);
-            nsLabel5.Name = "nsLabel5";
-            nsLabel5.Size = new Size(56, 23);
-            nsLabel5.TabIndex = 6;
-            nsLabel5.Text = "nsLabel5";
-            nsLabel5.Value1 = " ";
-            nsLabel5.Value2 = "Profile:";
+            ROLabel5.BackColor = Color.FromArgb(40, 40, 40);
+            ROLabel5.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
+            ROLabel5.Location = new Point(9, 54);
+            ROLabel5.Name = "ROLabel5";
+            ROLabel5.Size = new Size(56, 23);
+            ROLabel5.TabIndex = 6;
+            ROLabel5.Text = "ROLabel5";
+            ROLabel5.Value1 = " ";
+            ROLabel5.Value2 = "Profile:";
             // 
             // profileDropdown
             // 
             profileDropdown.BackColor = Color.FromArgb(50, 50, 50);
             profileDropdown.DrawMode = DrawMode.OwnerDrawFixed;
             profileDropdown.DropDownStyle = ComboBoxStyle.DropDownList;
+            profileDropdown.Font = new Font("Segoe UI", 10F);
             profileDropdown.ForeColor = Color.White;
             profileDropdown.FormattingEnabled = true;
+            profileDropdown.ItemHeight = 22;
             profileDropdown.Items.AddRange(new object[] { "Competitive (Max FPS)", "Balanced (Good-looking & Fast)", "Recommended (Optimized)", "Ultra (Maximum Visuals)" });
             profileDropdown.Location = new Point(71, 54);
             profileDropdown.Name = "profileDropdown";
-            profileDropdown.Size = new Size(224, 24);
+            profileDropdown.Size = new Size(224, 28);
             profileDropdown.TabIndex = 0;
             // 
             // menuStrip1
             // 
+            menuStrip1.BackColor = Color.FromArgb(40, 40, 40);
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, aboutToolStripMenuItem, supportToolStripMenuItem, donateToolStripMenuItem, flushRamToolStripMenuItem, minimizeToTrayToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
@@ -317,13 +341,17 @@
             // 
             // fileToolStripMenuItem
             // 
+            fileToolStripMenuItem.BackColor = Color.FromArgb(40, 40, 40);
             fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { backUpLocationToolStripMenuItem, exitToolStripMenuItem, restoreBackupToolStripMenuItem, defaultSettingsToolStripMenuItem, exportProfileToolStripMenuItem, importProfileToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem1 });
+            fileToolStripMenuItem.ForeColor = Color.White;
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new Size(37, 20);
             fileToolStripMenuItem.Text = "File";
             // 
             // backUpLocationToolStripMenuItem
             // 
+            backUpLocationToolStripMenuItem.BackColor = SystemColors.Control;
+            backUpLocationToolStripMenuItem.ForeColor = Color.White;
             backUpLocationToolStripMenuItem.Name = "backUpLocationToolStripMenuItem";
             backUpLocationToolStripMenuItem.Size = new Size(164, 22);
             backUpLocationToolStripMenuItem.Text = "Back-ups Path...";
@@ -331,6 +359,8 @@
             // 
             // exitToolStripMenuItem
             // 
+            exitToolStripMenuItem.BackColor = SystemColors.Control;
+            exitToolStripMenuItem.ForeColor = Color.White;
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             exitToolStripMenuItem.Size = new Size(164, 22);
             exitToolStripMenuItem.Text = "Save Back-up...";
@@ -338,6 +368,8 @@
             // 
             // restoreBackupToolStripMenuItem
             // 
+            restoreBackupToolStripMenuItem.BackColor = SystemColors.Control;
+            restoreBackupToolStripMenuItem.ForeColor = Color.White;
             restoreBackupToolStripMenuItem.Name = "restoreBackupToolStripMenuItem";
             restoreBackupToolStripMenuItem.Size = new Size(164, 22);
             restoreBackupToolStripMenuItem.Text = "Restore Backup...";
@@ -345,6 +377,8 @@
             // 
             // defaultSettingsToolStripMenuItem
             // 
+            defaultSettingsToolStripMenuItem.BackColor = SystemColors.Control;
+            defaultSettingsToolStripMenuItem.ForeColor = Color.White;
             defaultSettingsToolStripMenuItem.Name = "defaultSettingsToolStripMenuItem";
             defaultSettingsToolStripMenuItem.Size = new Size(164, 22);
             defaultSettingsToolStripMenuItem.Text = "Load Defaults...";
@@ -352,6 +386,8 @@
             // 
             // exportProfileToolStripMenuItem
             // 
+            exportProfileToolStripMenuItem.BackColor = SystemColors.Control;
+            exportProfileToolStripMenuItem.ForeColor = Color.White;
             exportProfileToolStripMenuItem.Name = "exportProfileToolStripMenuItem";
             exportProfileToolStripMenuItem.Size = new Size(164, 22);
             exportProfileToolStripMenuItem.Text = "Export Profile...";
@@ -359,6 +395,8 @@
             // 
             // importProfileToolStripMenuItem
             // 
+            importProfileToolStripMenuItem.BackColor = SystemColors.Control;
+            importProfileToolStripMenuItem.ForeColor = Color.White;
             importProfileToolStripMenuItem.Name = "importProfileToolStripMenuItem";
             importProfileToolStripMenuItem.Size = new Size(164, 22);
             importProfileToolStripMenuItem.Text = "Import Profile...";
@@ -371,6 +409,8 @@
             // 
             // exitToolStripMenuItem1
             // 
+            exitToolStripMenuItem1.BackColor = SystemColors.Control;
+            exitToolStripMenuItem1.ForeColor = Color.White;
             exitToolStripMenuItem1.Name = "exitToolStripMenuItem1";
             exitToolStripMenuItem1.Size = new Size(164, 22);
             exitToolStripMenuItem1.Text = "Exit";
@@ -379,12 +419,14 @@
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutToolStripMenuItem1, openLogFileToolStripMenuItem, openLogFilePathToolStripMenuItem, openSettingsFilePathToolStripMenuItem });
+            aboutToolStripMenuItem.ForeColor = Color.White;
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             aboutToolStripMenuItem.Size = new Size(44, 20);
             aboutToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem1
             // 
+            aboutToolStripMenuItem1.ForeColor = Color.White;
             aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
             aboutToolStripMenuItem1.Size = new Size(205, 22);
             aboutToolStripMenuItem1.Text = "About";
@@ -392,6 +434,7 @@
             // 
             // openLogFileToolStripMenuItem
             // 
+            openLogFileToolStripMenuItem.ForeColor = Color.White;
             openLogFileToolStripMenuItem.Name = "openLogFileToolStripMenuItem";
             openLogFileToolStripMenuItem.Size = new Size(205, 22);
             openLogFileToolStripMenuItem.Text = "Open Log File...";
@@ -399,6 +442,7 @@
             // 
             // openLogFilePathToolStripMenuItem
             // 
+            openLogFilePathToolStripMenuItem.ForeColor = Color.White;
             openLogFilePathToolStripMenuItem.Name = "openLogFilePathToolStripMenuItem";
             openLogFilePathToolStripMenuItem.Size = new Size(205, 22);
             openLogFilePathToolStripMenuItem.Text = "Open Log File Path...";
@@ -406,6 +450,7 @@
             // 
             // openSettingsFilePathToolStripMenuItem
             // 
+            openSettingsFilePathToolStripMenuItem.ForeColor = Color.White;
             openSettingsFilePathToolStripMenuItem.Name = "openSettingsFilePathToolStripMenuItem";
             openSettingsFilePathToolStripMenuItem.Size = new Size(205, 22);
             openSettingsFilePathToolStripMenuItem.Text = "Open Settings File Path...";
@@ -413,6 +458,7 @@
             // 
             // supportToolStripMenuItem
             // 
+            supportToolStripMenuItem.ForeColor = Color.White;
             supportToolStripMenuItem.Name = "supportToolStripMenuItem";
             supportToolStripMenuItem.Size = new Size(61, 20);
             supportToolStripMenuItem.Text = "Support";
@@ -420,6 +466,7 @@
             // 
             // donateToolStripMenuItem
             // 
+            donateToolStripMenuItem.ForeColor = Color.White;
             donateToolStripMenuItem.Name = "donateToolStripMenuItem";
             donateToolStripMenuItem.Size = new Size(57, 20);
             donateToolStripMenuItem.Text = "Donate";
@@ -427,6 +474,7 @@
             // 
             // flushRamToolStripMenuItem
             // 
+            flushRamToolStripMenuItem.ForeColor = Color.White;
             flushRamToolStripMenuItem.Name = "flushRamToolStripMenuItem";
             flushRamToolStripMenuItem.Size = new Size(83, 20);
             flushRamToolStripMenuItem.Text = "Flush Ram...";
@@ -434,121 +482,135 @@
             // 
             // minimizeToTrayToolStripMenuItem
             // 
+            minimizeToTrayToolStripMenuItem.ForeColor = Color.White;
             minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
             minimizeToTrayToolStripMenuItem.Size = new Size(116, 20);
             minimizeToTrayToolStripMenuItem.Text = "Minimize to Tray...";
             minimizeToTrayToolStripMenuItem.Click += minimizeToTrayToolStripMenuItem_Click;
             // 
-            // nsGroupBox4
+            // ROGroupBox4
             // 
-            nsGroupBox4.Controls.Add(saveBackupBtn);
-            nsGroupBox4.Controls.Add(restoreBackupBtn);
-            nsGroupBox4.Controls.Add(nsLabel6);
-            nsGroupBox4.Controls.Add(backupDropdown);
-            nsGroupBox4.DrawSeperator = false;
-            nsGroupBox4.Location = new Point(329, 330);
-            nsGroupBox4.Name = "nsGroupBox4";
-            nsGroupBox4.Size = new Size(325, 144);
-            nsGroupBox4.SubTitle = "Back-up, and Restore your game settings";
-            nsGroupBox4.TabIndex = 7;
-            nsGroupBox4.Text = "nsGroupBox4";
-            nsGroupBox4.Title = "Back-up & Restore";
+            ROGroupBox4.BackColor = Color.Transparent;
+            ROGroupBox4.Controls.Add(saveBackupBtn);
+            ROGroupBox4.Controls.Add(restoreBackupBtn);
+            ROGroupBox4.Controls.Add(ROLabel6);
+            ROGroupBox4.Controls.Add(backupDropdown);
+            ROGroupBox4.Font = new Font("Segoe UI", 10F);
+            ROGroupBox4.Location = new Point(329, 330);
+            ROGroupBox4.Name = "ROGroupBox4";
+            ROGroupBox4.Padding = new Padding(10, 45, 10, 10);
+            ROGroupBox4.Size = new Size(325, 144);
+            ROGroupBox4.SubTitle = "Back-up, and Restore your game settings";
+            ROGroupBox4.TabIndex = 7;
+            ROGroupBox4.Text = "ROGroupBox4";
+            ROGroupBox4.Title = "Back-up & Restore";
             // 
             // saveBackupBtn
             // 
-            saveBackupBtn.Location = new Point(127, 102);
+            saveBackupBtn.BackColor = Color.Transparent;
+            saveBackupBtn.Font = new Font("Segoe UI", 9.5F);
+            saveBackupBtn.Location = new Point(13, 102);
             saveBackupBtn.Name = "saveBackupBtn";
-            saveBackupBtn.Size = new Size(88, 23);
+            saveBackupBtn.Size = new Size(104, 30);
             saveBackupBtn.TabIndex = 7;
             saveBackupBtn.Text = "Save Back-Up";
             saveBackupBtn.Click += saveBackupBtn_Click;
             // 
             // restoreBackupBtn
             // 
+            restoreBackupBtn.BackColor = Color.Transparent;
+            restoreBackupBtn.Font = new Font("Segoe UI", 9.5F);
             restoreBackupBtn.Location = new Point(221, 102);
             restoreBackupBtn.Name = "restoreBackupBtn";
-            restoreBackupBtn.Size = new Size(88, 23);
+            restoreBackupBtn.Size = new Size(88, 30);
             restoreBackupBtn.TabIndex = 4;
             restoreBackupBtn.Text = "Restore...";
             restoreBackupBtn.Click += restoreBackupBtn_Click;
             // 
-            // nsLabel6
+            // ROLabel6
             // 
-            nsLabel6.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
-            nsLabel6.Location = new Point(9, 54);
-            nsLabel6.Name = "nsLabel6";
-            nsLabel6.Size = new Size(77, 23);
-            nsLabel6.TabIndex = 6;
-            nsLabel6.Text = "nsLabel6";
-            nsLabel6.Value1 = " ";
-            nsLabel6.Value2 = "Back-ups:";
+            ROLabel6.BackColor = Color.FromArgb(40, 40, 40);
+            ROLabel6.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
+            ROLabel6.Location = new Point(9, 54);
+            ROLabel6.Name = "ROLabel6";
+            ROLabel6.Size = new Size(77, 23);
+            ROLabel6.TabIndex = 6;
+            ROLabel6.Text = "ROLabel6";
+            ROLabel6.Value1 = " ";
+            ROLabel6.Value2 = "Back-ups:";
             // 
             // backupDropdown
             // 
             backupDropdown.BackColor = Color.FromArgb(50, 50, 50);
             backupDropdown.DrawMode = DrawMode.OwnerDrawFixed;
             backupDropdown.DropDownStyle = ComboBoxStyle.DropDownList;
+            backupDropdown.Font = new Font("Segoe UI", 10F);
             backupDropdown.ForeColor = Color.White;
             backupDropdown.FormattingEnabled = true;
+            backupDropdown.ItemHeight = 22;
             backupDropdown.Location = new Point(92, 54);
             backupDropdown.Name = "backupDropdown";
-            backupDropdown.Size = new Size(217, 24);
+            backupDropdown.Size = new Size(217, 28);
             backupDropdown.TabIndex = 0;
             // 
-            // nsGroupBox5
+            // ROGroupBox5
             // 
-            nsGroupBox5.Controls.Add(nsTabControl1);
-            nsGroupBox5.Controls.Add(saveAdvancedCfgBtn);
-            nsGroupBox5.DrawSeperator = false;
-            nsGroupBox5.Location = new Point(12, 480);
-            nsGroupBox5.Name = "nsGroupBox5";
-            nsGroupBox5.Size = new Size(642, 196);
-            nsGroupBox5.SubTitle = "Set RAM to Auto Flush, and more.";
-            nsGroupBox5.TabIndex = 6;
-            nsGroupBox5.Text = "nsGroupBox5";
-            nsGroupBox5.Title = "Optimization Tools";
+            ROGroupBox5.BackColor = Color.Transparent;
+            ROGroupBox5.Controls.Add(ROTabControl1);
+            ROGroupBox5.Controls.Add(saveAdvancedCfgBtn);
+            ROGroupBox5.Font = new Font("Segoe UI", 10F);
+            ROGroupBox5.Location = new Point(12, 480);
+            ROGroupBox5.Name = "ROGroupBox5";
+            ROGroupBox5.Padding = new Padding(10, 45, 10, 10);
+            ROGroupBox5.Size = new Size(642, 196);
+            ROGroupBox5.SubTitle = "Set RAM to Auto Flush, and more.";
+            ROGroupBox5.TabIndex = 6;
+            ROGroupBox5.Text = "ROGroupBox5";
+            ROGroupBox5.Title = "Optimization Tools";
             // 
-            // nsTabControl1
+            // ROTabControl1
             // 
-            nsTabControl1.Alignment = TabAlignment.Left;
-            nsTabControl1.Controls.Add(tabPage2);
-            nsTabControl1.Controls.Add(tabPage1);
-            nsTabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
-            nsTabControl1.ItemSize = new Size(28, 115);
-            nsTabControl1.Location = new Point(3, 49);
-            nsTabControl1.Multiline = true;
-            nsTabControl1.Name = "nsTabControl1";
-            nsTabControl1.SelectedIndex = 0;
-            nsTabControl1.Size = new Size(639, 109);
-            nsTabControl1.SizeMode = TabSizeMode.Fixed;
-            nsTabControl1.TabIndex = 15;
+            ROTabControl1.Alignment = TabAlignment.Left;
+            ROTabControl1.Controls.Add(tabPage2);
+            ROTabControl1.Controls.Add(tabPage1);
+            ROTabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
+            ROTabControl1.ItemSize = new Size(28, 150);
+            ROTabControl1.Location = new Point(3, 49);
+            ROTabControl1.Multiline = true;
+            ROTabControl1.Name = "ROTabControl1";
+            ROTabControl1.SelectedIndex = 0;
+            ROTabControl1.Size = new Size(639, 109);
+            ROTabControl1.SizeMode = TabSizeMode.Fixed;
+            ROTabControl1.TabIndex = 15;
             // 
             // tabPage2
             // 
-            tabPage2.BackColor = Color.FromArgb(0, 0, 0);
-            tabPage2.Controls.Add(nsLabel10);
+            tabPage2.BackColor = Color.FromArgb(40, 40, 40);
+            tabPage2.Controls.Add(ROLabel10);
             tabPage2.Controls.Add(highPriority);
-            tabPage2.Location = new Point(119, 4);
+            tabPage2.Location = new Point(154, 4);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(516, 101);
+            tabPage2.Size = new Size(481, 101);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "General Tools";
             // 
-            // nsLabel10
+            // ROLabel10
             // 
-            nsLabel10.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
-            nsLabel10.Location = new Point(6, 7);
-            nsLabel10.Name = "nsLabel10";
-            nsLabel10.Size = new Size(158, 23);
-            nsLabel10.TabIndex = 14;
-            nsLabel10.Text = "nsLabel10";
-            nsLabel10.Value1 = " ";
-            nsLabel10.Value2 = "Rust CPU High Priority:";
+            ROLabel10.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            ROLabel10.Location = new Point(6, 7);
+            ROLabel10.Name = "ROLabel10";
+            ROLabel10.Size = new Size(158, 23);
+            ROLabel10.TabIndex = 14;
+            ROLabel10.Text = "ROLabel10";
+            ROLabel10.Value1 = " ";
+            ROLabel10.Value2 = "Rust CPU High Priority:";
             // 
             // highPriority
             // 
+            highPriority.BackColor = Color.Transparent;
             highPriority.Checked = false;
+            highPriority.Font = new Font("Segoe UI", 10F);
             highPriority.Location = new Point(170, 7);
             highPriority.Name = "highPriority";
             highPriority.Size = new Size(120, 23);
@@ -557,36 +619,38 @@
             // 
             // tabPage1
             // 
-            tabPage1.BackColor = Color.FromArgb(0, 0, 0);
-            tabPage1.Controls.Add(nsLabel7);
+            tabPage1.BackColor = Color.FromArgb(40, 40, 40);
+            tabPage1.Controls.Add(ROLabel7);
             tabPage1.Controls.Add(autoFlushChk);
-            tabPage1.Controls.Add(nsLabel9);
+            tabPage1.Controls.Add(ROLabel9);
             tabPage1.Controls.Add(autoFlushinterval);
-            tabPage1.Controls.Add(nsLabel8);
+            tabPage1.Controls.Add(ROLabel8);
             tabPage1.Controls.Add(autoFlushMinHour);
             tabPage1.Controls.Add(autoFlushSound);
-            tabPage1.Controls.Add(nsSeperator1);
-            tabPage1.Location = new Point(119, 4);
+            tabPage1.Controls.Add(ROSeperator1);
+            tabPage1.Location = new Point(154, 4);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(516, 101);
+            tabPage1.Size = new Size(481, 101);
             tabPage1.TabIndex = 0;
-            tabPage1.Text = "Auto Flush";
+            tabPage1.Text = "Auto Flush Settings";
             // 
-            // nsLabel7
+            // ROLabel7
             // 
-            nsLabel7.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
-            nsLabel7.Location = new Point(6, 46);
-            nsLabel7.Name = "nsLabel7";
-            nsLabel7.Size = new Size(158, 23);
-            nsLabel7.TabIndex = 8;
-            nsLabel7.Text = "nsLabel7";
-            nsLabel7.Value1 = " ";
-            nsLabel7.Value2 = "Auto Flush Interval:";
+            ROLabel7.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            ROLabel7.Location = new Point(6, 46);
+            ROLabel7.Name = "ROLabel7";
+            ROLabel7.Size = new Size(158, 23);
+            ROLabel7.TabIndex = 8;
+            ROLabel7.Text = "ROLabel7";
+            ROLabel7.Value1 = " ";
+            ROLabel7.Value2 = "Auto Flush Interval:";
             // 
             // autoFlushChk
             // 
+            autoFlushChk.BackColor = Color.Transparent;
             autoFlushChk.Checked = false;
+            autoFlushChk.Font = new Font("Segoe UI", 10F);
             autoFlushChk.Location = new Point(170, 7);
             autoFlushChk.Name = "autoFlushChk";
             autoFlushChk.Size = new Size(120, 23);
@@ -594,16 +658,16 @@
             autoFlushChk.Text = "Enable/Disable";
             autoFlushChk.CheckedChanged += autoFlushChk_CheckedChanged;
             // 
-            // nsLabel9
+            // ROLabel9
             // 
-            nsLabel9.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
-            nsLabel9.Location = new Point(6, 7);
-            nsLabel9.Name = "nsLabel9";
-            nsLabel9.Size = new Size(156, 23);
-            nsLabel9.TabIndex = 12;
-            nsLabel9.Text = "nsLabel9";
-            nsLabel9.Value1 = " ";
-            nsLabel9.Value2 = "Auto Flush Enable:";
+            ROLabel9.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            ROLabel9.Location = new Point(6, 7);
+            ROLabel9.Name = "ROLabel9";
+            ROLabel9.Size = new Size(156, 23);
+            ROLabel9.TabIndex = 12;
+            ROLabel9.Text = "ROLabel9";
+            ROLabel9.Value1 = " ";
+            ROLabel9.Value2 = "Auto Flush Enable:";
             // 
             // autoFlushinterval
             // 
@@ -612,38 +676,42 @@
             autoFlushinterval.Location = new Point(170, 44);
             autoFlushinterval.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             autoFlushinterval.Name = "autoFlushinterval";
-            autoFlushinterval.Size = new Size(117, 23);
+            autoFlushinterval.Size = new Size(117, 25);
             autoFlushinterval.TabIndex = 0;
             autoFlushinterval.Value = new decimal(new int[] { 15, 0, 0, 0 });
             autoFlushinterval.ValueChanged += autoFlushinterval_ValueChanged;
             // 
-            // nsLabel8
+            // ROLabel8
             // 
-            nsLabel8.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
-            nsLabel8.Location = new Point(6, 73);
-            nsLabel8.Name = "nsLabel8";
-            nsLabel8.Size = new Size(158, 23);
-            nsLabel8.TabIndex = 10;
-            nsLabel8.Text = "nsLabel8";
-            nsLabel8.Value1 = " ";
-            nsLabel8.Value2 = "RAM Flush SFX:";
+            ROLabel8.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            ROLabel8.Location = new Point(6, 73);
+            ROLabel8.Name = "ROLabel8";
+            ROLabel8.Size = new Size(158, 23);
+            ROLabel8.TabIndex = 10;
+            ROLabel8.Text = "ROLabel8";
+            ROLabel8.Value1 = " ";
+            ROLabel8.Value2 = "RAM Flush SFX:";
             // 
             // autoFlushMinHour
             // 
             autoFlushMinHour.BackColor = Color.FromArgb(50, 50, 50);
             autoFlushMinHour.DrawMode = DrawMode.OwnerDrawFixed;
             autoFlushMinHour.DropDownStyle = ComboBoxStyle.DropDownList;
+            autoFlushMinHour.Font = new Font("Segoe UI", 10F);
             autoFlushMinHour.ForeColor = Color.White;
             autoFlushMinHour.FormattingEnabled = true;
+            autoFlushMinHour.ItemHeight = 22;
             autoFlushMinHour.Items.AddRange(new object[] { "Minutes", "Hours" });
             autoFlushMinHour.Location = new Point(293, 43);
             autoFlushMinHour.Name = "autoFlushMinHour";
-            autoFlushMinHour.Size = new Size(211, 24);
+            autoFlushMinHour.Size = new Size(176, 28);
             autoFlushMinHour.TabIndex = 8;
             // 
             // autoFlushSound
             // 
+            autoFlushSound.BackColor = Color.Transparent;
             autoFlushSound.Checked = false;
+            autoFlushSound.Font = new Font("Segoe UI", 10F);
             autoFlushSound.Location = new Point(170, 73);
             autoFlushSound.Name = "autoFlushSound";
             autoFlushSound.Size = new Size(120, 23);
@@ -651,16 +719,18 @@
             autoFlushSound.Text = "Enable/Disable";
             autoFlushSound.CheckedChanged += autoFlushSound_CheckedChanged;
             // 
-            // nsSeperator1
+            // ROSeperator1
             // 
-            nsSeperator1.Location = new Point(1, 29);
-            nsSeperator1.Name = "nsSeperator1";
-            nsSeperator1.Size = new Size(513, 10);
-            nsSeperator1.TabIndex = 13;
-            nsSeperator1.Text = "nsSeperator1";
+            ROSeperator1.Location = new Point(2, 29);
+            ROSeperator1.Name = "ROSeperator1";
+            ROSeperator1.Size = new Size(477, 10);
+            ROSeperator1.TabIndex = 13;
+            ROSeperator1.Text = "ROSeperator1";
             // 
             // saveAdvancedCfgBtn
             // 
+            saveAdvancedCfgBtn.BackColor = Color.Transparent;
+            saveAdvancedCfgBtn.Font = new Font("Segoe UI", 9.5F);
             saveAdvancedCfgBtn.Location = new Point(8, 161);
             saveAdvancedCfgBtn.Name = "saveAdvancedCfgBtn";
             saveAdvancedCfgBtn.Size = new Size(626, 29);
@@ -673,7 +743,7 @@
             linkLabel1.AutoSize = true;
             linkLabel1.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             linkLabel1.LinkColor = Color.Orange;
-            linkLabel1.Location = new Point(314, 683);
+            linkLabel1.Location = new Point(397, 20);
             linkLabel1.Name = "linkLabel1";
             linkLabel1.Size = new Size(258, 17);
             linkLabel1.TabIndex = 13;
@@ -685,26 +755,39 @@
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(116, 685);
+            label1.Location = new Point(420, 5);
             label1.Name = "label1";
             label1.Size = new Size(198, 15);
             label1.TabIndex = 13;
             label1.Text = "Like what I do? Consider Donating:";
             label1.Click += label1_Click;
             // 
+            // linkLabel3
+            // 
+            linkLabel3.AutoSize = true;
+            linkLabel3.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            linkLabel3.LinkColor = Color.Orange;
+            linkLabel3.Location = new Point(446, 679);
+            linkLabel3.Name = "linkLabel3";
+            linkLabel3.Size = new Size(225, 17);
+            linkLabel3.TabIndex = 15;
+            linkLabel3.TabStop = true;
+            linkLabel3.Text = "https://rustoptimizer.voidtech.xyz/";
+            linkLabel3.LinkClicked += linkLabel3_LinkClicked;
+            // 
             // MainFrm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
-            ClientSize = new Size(666, 710);
-            Controls.Add(label1);
-            Controls.Add(linkLabel1);
-            Controls.Add(nsGroupBox5);
-            Controls.Add(nsGroupBox4);
-            Controls.Add(nsGroupBox3);
-            Controls.Add(nsGroupBox2);
-            Controls.Add(nsGroupBox1);
+            ClientSize = new Size(666, 703);
+            Controls.Add(linkLabel3);
+            Controls.Add(ROGroupBox5);
+            Controls.Add(ROGroupBox4);
+            Controls.Add(ROGroupBox3);
+            Controls.Add(ROGroupBox2);
+            Controls.Add(ROGroupBox1);
+            Controls.Add(linkLabel2);
             Controls.Add(menuStrip1);
             ForeColor = Color.White;
             FormBorderStyle = FormBorderStyle.Fixed3D;
@@ -714,16 +797,16 @@
             Name = "MainFrm";
             Text = "Rust Optimizer";
             Load += MainFrm_Load;
-            nsGroupBox1.ResumeLayout(false);
-            nsGroupBox1.PerformLayout();
-            nsGroupBox2.ResumeLayout(false);
-            nsGroupBox2.PerformLayout();
-            nsGroupBox3.ResumeLayout(false);
+            ROGroupBox1.ResumeLayout(false);
+            ROGroupBox1.PerformLayout();
+            ROGroupBox2.ResumeLayout(false);
+            ROGroupBox2.PerformLayout();
+            ROGroupBox3.ResumeLayout(false);
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
-            nsGroupBox4.ResumeLayout(false);
-            nsGroupBox5.ResumeLayout(false);
-            nsTabControl1.ResumeLayout(false);
+            ROGroupBox4.ResumeLayout(false);
+            ROGroupBox5.ResumeLayout(false);
+            ROTabControl1.ResumeLayout(false);
             tabPage2.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)autoFlushinterval).EndInit();
@@ -733,27 +816,27 @@
 
         #endregion
 
-        private GUI.NSGroupBox nsGroupBox1;
-        private GUI.NSLabel nsLabel1;
-        private GUI.NSButton gamePathSelectBtn;
-        private GUI.NSGroupBox nsGroupBox2;
+        private GUI.ROGroupBox ROGroupBox1;
+        private GUI.ROLabel ROLabel1;
+        private GUI.ROButton gamePathSelectBtn;
+        private GUI.ROGroupBox ROGroupBox2;
         private Label lblGPUInfo;
         private Label lblCPUInfo;
-        private GUI.NSLabel nsLabel4;
-        private GUI.NSLabel nsLabel3;
-        private GUI.NSLabel nsLabel2;
+        private GUI.ROLabel ROLabel4;
+        private GUI.ROLabel ROLabel3;
+        private GUI.ROLabel ROLabel2;
         private Label lblRAMInfo;
-        private GUI.NSGroupBox nsGroupBox3;
-        private GUI.NSLabel nsLabel5;
-        private GUI.NSComboBox profileDropdown;
-        private GUI.NSButton optimizeBtn;
+        private GUI.ROGroupBox ROGroupBox3;
+        private GUI.ROLabel ROLabel5;
+        private GUI.ROComboBox profileDropdown;
+        private GUI.ROButton optimizeBtn;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem fileToolStripMenuItem;
-        private GUI.NSGroupBox nsGroupBox4;
-        private GUI.NSButton restoreBackupBtn;
-        private GUI.NSLabel nsLabel6;
-        private GUI.NSComboBox backupDropdown;
-        private GUI.NSButton saveBackupBtn;
+        private GUI.ROGroupBox ROGroupBox4;
+        private GUI.ROButton restoreBackupBtn;
+        private GUI.ROLabel ROLabel6;
+        private GUI.ROComboBox backupDropdown;
+        private GUI.ROButton saveBackupBtn;
         private ToolStripMenuItem backUpLocationToolStripMenuItem;
         private ToolStripMenuItem exitToolStripMenuItem;
         private ToolStripMenuItem defaultSettingsToolStripMenuItem;
@@ -763,18 +846,18 @@
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem exitToolStripMenuItem1;
         private ToolStripMenuItem restoreBackupToolStripMenuItem;
-        private GUI.NSButton autoDetectBtn;
+        private GUI.ROButton autoDetectBtn;
         private ToolStripMenuItem exportProfileToolStripMenuItem;
         private ToolStripMenuItem importProfileToolStripMenuItem;
         private ToolStripMenuItem flushRamToolStripMenuItem;
-        private GUI.NSGroupBox nsGroupBox5;
-        private GUI.NSLabel nsLabel7;
-        private GUI.NSComboBox autoFlushMinHour;
+        private GUI.ROGroupBox ROGroupBox5;
+        private GUI.ROLabel ROLabel7;
+        private GUI.ROComboBox autoFlushMinHour;
         private NumericUpDown autoFlushinterval;
-        private GUI.NSButton saveAdvancedCfgBtn;
-        private GUI.NSLabel nsLabel9;
-        private GUI.NSLabel nsLabel8;
-        private GUI.NSCheckBox autoFlushSound;
+        private GUI.ROButton saveAdvancedCfgBtn;
+        private GUI.ROLabel ROLabel9;
+        private GUI.ROLabel ROLabel8;
+        private GUI.ROCheckBox autoFlushSound;
         private LinkLabel linkLabel2;
         private LinkLabel linkLabel1;
         private Label label1;
@@ -784,18 +867,19 @@
         private ToolStripMenuItem toolStripMenuItem5;
         private ToolStripMenuItem toolStripMenuItem6;
         private ToolStripMenuItem donateToolStripMenuItem;
-        public GUI.NSCheckBox autoFlushChk;
-        private GUI.NSLabel nsLabel10;
-        public GUI.NSCheckBox highPriority;
+        public GUI.ROCheckBox autoFlushChk;
+        private GUI.ROLabel ROLabel10;
+        public GUI.ROCheckBox highPriority;
         private ToolStripMenuItem minimizeToTrayToolStripMenuItem;
-        private GUI.NSButton launchRustBtn;
-        private GUI.NSTabControl nsTabControl1;
+        private GUI.ROTabControl ROTabControl1;
         private TabPage tabPage1;
         private TabPage tabPage2;
-        private GUI.NSSeperator nsSeperator1;
+        private GUI.ROSeperator ROSeperator1;
         private ToolStripMenuItem openLogFileToolStripMenuItem;
         private ToolStripMenuItem openLogFilePathToolStripMenuItem;
         private ToolStripMenuItem openSettingsFilePathToolStripMenuItem;
-        public GUI.NSTextBox gamePathString;
+        public GUI.ROTextBox gamePathString;
+        private GUI.LaunchButton launchButton1;
+        private LinkLabel linkLabel3;
     }
 }

@@ -45,17 +45,14 @@ namespace RustOptimizer.Core
         public void SaveSettings(string filePath)
         {
             string? directory = Path.GetDirectoryName(filePath);
-
             if (!string.IsNullOrEmpty(directory))
             {
                 Directory.CreateDirectory(directory);
             }
-
             if (File.Exists(filePath))
             {
                 File.Copy(filePath, filePath + ".bak", true);
             }
-
             using (StreamWriter writer = new StreamWriter(filePath))
             {
                 foreach (var kvp in settings)

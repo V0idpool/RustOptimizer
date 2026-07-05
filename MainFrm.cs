@@ -15,6 +15,10 @@ namespace RustOptimizer
         {
             InitializeComponent();
             Instance = this;
+            // Fixes the buggy colors of the menustrip :(
+            menuStrip1.Renderer = new ToolStripProfessionalRenderer(new GUI.ColorTable());
+            menuStrip1.ForeColor = Color.White;
+            menuStrip1.BackColor = Color.FromArgb(40, 40, 40);
         }
 
         private void MainFrm_Load(object sender, EventArgs e)
@@ -71,11 +75,11 @@ namespace RustOptimizer
                 autoFlushMinHour.Text = "Minutes";
             }
 
-                autoFlushChk.Checked = UserConfigs.AutoFlushEnabled;
-                highPriority.Checked = UserConfigs.CPUHighPriority;
-                Optimizer.SetPriority(UserConfigs.CPUHighPriority);
+            autoFlushChk.Checked = UserConfigs.AutoFlushEnabled;
+            highPriority.Checked = UserConfigs.CPUHighPriority;
+            Optimizer.SetPriority(UserConfigs.CPUHighPriority);
 
-                autoFlushSound.Checked = UserConfigs.AutoFlushSfx;
+            autoFlushSound.Checked = UserConfigs.AutoFlushSfx;
             if (autoFlushChk.Checked && !Optimizer.IsAdministrator())
             {
                 autoFlushChk.Checked = false;
@@ -108,7 +112,7 @@ namespace RustOptimizer
                     }
                     catch (System.ComponentModel.Win32Exception)
                     {
-                        UserConfigs.AutoFlushEnabled=false;
+                        UserConfigs.AutoFlushEnabled = false;
                         autoFlushChk.Checked = false;
                         MessageBox.Show("Restart canceled. Rust Optimizer will run in standard user mode without Auto Flush features.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
@@ -193,8 +197,9 @@ namespace RustOptimizer
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
                 {
                     UserConfigs.SetGamePath(fbd.SelectedPath);
-                    gamePathString.Text = UserConfigs.GamePath;
-                    ini.WriteValue("AppSettings", "GamePath", UserConfigs.GamePath, ini.Path);
+                    gamePathString.Text = fbd.SelectedPath;
+                    ini.WriteValue("AppSettings", "GamePath", fbd.SelectedPath, ini.Path);
+                    UserConfigs.Refresh();
                 }
             }
         }
@@ -214,8 +219,7 @@ namespace RustOptimizer
         {
             UserConfigs.SetGamePath(gamePathString.Text);
             gamePathString.Text = UserConfigs.GamePath;
-
-            if (string.IsNullOrEmpty(UserConfigs.GamePath) || !Directory.Exists(UserConfigs.GamePath))
+            if (string.IsNullOrEmpty(gamePathString.Text) || !Directory.Exists(gamePathString.Text))
             {
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -284,10 +288,7 @@ namespace RustOptimizer
                 MessageBox.Show("Selected backup file not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
             UserConfigs.EnsureGameConfigDirectory();
-
-
             File.Copy(backupConfigPath, UserConfigs.GameConfigPath, true);
             MessageBox.Show("Settings restored successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -443,28 +444,31 @@ namespace RustOptimizer
         }
         private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            string titleAbout = "About RustOptimizer";
+            string titleAbout = "About Rust Optimizer";
 
             string rtfMessage =
-                @"{\rtf1\ansi\deff0 " +
-                @"{\fonttbl{\f0 Arial;}}" +
-                @"{\colortbl;\red0\green0\blue0;\red255\green128\blue0;\red255\green0\blue0;}" +
-                @"\fs24 " +
-                @"\pard\sa0\sl250\slmult1\cf2 " +
+        @"{\rtf1\ansi\deff0 " +
+        @"{\fonttbl{\f0 Arial;}}" +
+        @"{\colortbl;\red0\green0\blue0;\red255\green128\blue0;\red255\green0\blue0;}" +
+        @"\fs24 " +
+        @"\pard\sa0\sl250\slmult1\cf2 " +
 
-               @"\b\f0\fs24 RustOptimizer:\b0\par " +
-        @"\fs20 RustOptimizer is a tool designed to help users quickly and easily optimize their Rust game settings. It automates the process of adjusting the game's client.cfg file to improve performance and provide an optimal gaming experience based on your system hardware.\par\par " +
+        @"\b\f0\fs28 Rust Optimizer\b0\par " +
+        @"\fs20 A lightweight, open-source Optimization Tool designed specifically to fix Rusts memory leaks and config issues so you can focus on the wipe. Maximize your FPS!\par\par " +
 
-                @"\b\fs24 Useful Links:\b0\par " +
-                @"\fs20\cf2 " +
-                @"\b\fs24 • Downloads:\b0\par " +
-                @"\fs20\hlink https://github.com/V0idpool/RustOptimizer\par " +
-                @"\fs20\hlink https://www.nexusmods.com/rust/mods/5\par\par " +
-                @"\b\fs24 • Donations:\b0\par " +
-                @"\fs20\hlink https://buymeacoffee.com/rustforgedev\par\par " +
-                @"\b\fs24 • Support:\b0\par " +
-                @"\fs20\hlink https://discord.gg/tfwf9Qr7rG\par\par " +
-                @"}";
+        @"\b\fs24 • Official Website & Documentation:\b0\par " +
+        @"\fs20\hlink https://rustoptimizer.voidtech.xyz/\par\par " +
+
+        @"\b\fs24 • Community & Source Code:\b0\par " +
+        @"\fs20\hlink https://www.nexusmods.com/rust/mods/5\par " +
+        @"\fs20\hlink https://github.com/V0idpool/RustOptimizer\par\par " +
+
+        @"\b\fs24 • Support & Discord:\b0\par " +
+        @"\fs20\hlink https://discord.gg/tfwf9Qr7rG\par\par " +
+
+        @"\b\fs24 • Support Development:\b0\par " +
+        @"\fs20\hlink https://buymeacoffee.com/rustforgedev\par " +
+        @"}";
 
             using (About aboutForm = new About(rtfMessage))
             {
@@ -525,7 +529,6 @@ namespace RustOptimizer
                     try
                     {
                         UserConfigs.EnsureGameConfigDirectory();
-
                         File.Copy(ofd.FileName, UserConfigs.GameConfigPath, true);
                         MessageBox.Show("Profile imported successfully! Restart your game for changes to take effect.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -552,11 +555,9 @@ namespace RustOptimizer
         private void saveAdvancedCfgBtn_Click(object sender, EventArgs e)
         {
             var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
-
             UserConfigs.SetGamePath(gamePathString.Text);
             gamePathString.Text = UserConfigs.GamePath;
-
-            ini.WriteValue("AppSettings", "GamePath", UserConfigs.GamePath, ini.Path);
+            ini.WriteValue("AppSettings", "GamePath", gamePathString.Text, ini.Path);
             ini.WriteValue("AppSettings", "Profile", profileDropdown.Text, ini.Path);
             ini.WriteValue("AppSettings", "AutoFlush", autoFlushChk.Checked.ToString(), ini.Path);
             ini.WriteValue("AppSettings", "FlushInterval", autoFlushinterval.Value.ToString(CultureInfo.InvariantCulture), ini.Path);
@@ -586,7 +587,7 @@ namespace RustOptimizer
 
         private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string site = "https://rustforge.us/";
+            string site = "https://voidtech.xyz/";
             Process.Start(new ProcessStartInfo
             {
                 FileName = site,
@@ -594,14 +595,14 @@ namespace RustOptimizer
             });
         }
 
-        private void autoFlushSound_CheckedChanged(object sender)
+        private void autoFlushSound_CheckedChanged(object sender, EventArgs e)
         {
             var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
             ini.WriteValue("AppSettings", "FlushSound", autoFlushSound.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
             UserConfigs.Refresh();
         }
 
-        private void autoFlushChk_CheckedChanged(object sender)
+        private void autoFlushChk_CheckedChanged(object sender, EventArgs e)
         {
             var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
             ini.WriteValue("AppSettings", "AutoFlush", autoFlushChk.Checked.ToString(), ini.Path);
@@ -700,6 +701,21 @@ namespace RustOptimizer
                 ExceptionHandler.LogMessage($"Could not open settings file path: {ex.Message}");
                 MessageBox.Show($"Could not open settings file path: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void launchButton1_Click(object sender, EventArgs e)
+        {
+            TrayHandler.LaunchRust();
+        }
+
+        private void linkLabel3_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string site = "https://rustoptimizer.voidtech.xyz/";
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = site,
+                UseShellExecute = true
+            });
         }
     }
 }

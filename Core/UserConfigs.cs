@@ -8,7 +8,7 @@ namespace RustOptimizer.Core
         public static string ConfigPath { get; private set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Rust Optimizer", "User", "UserCFG.ini");
         public static string BackupsPath { get; set; } = Path.Combine(Application.StartupPath, "backups");
         public static string GamePath { get; set; } = string.Empty;
-        public static string ?SavedProfile { get; set; } = null;
+        public static string? SavedProfile { get; set; } = null;
         public static bool AutoFlushEnabled { get; set; } = false;
         public static bool AutoFlushSfx { get; set; } = false;
         public static int AutoFlushInterval { get; set; } = 15;
