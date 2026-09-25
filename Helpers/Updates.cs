@@ -23,7 +23,7 @@ namespace RustOptimizer.Helpers
                     client.Timeout = TimeSpan.FromSeconds(10);
                     client.DefaultRequestHeaders.Add("User-Agent", "RustOptimizer-UpdateClient");
                     string fetchedVersionStr = await client.GetStringAsync(VersionUrl);
-                    fetchedVersionStr = fetchedVersionStr.Trim();
+                    fetchedVersionStr = new string(fetchedVersionStr.Where(c => char.IsDigit(c) || c == '.').ToArray());
 
                     if (Version.TryParse(fetchedVersionStr, out Version onlineVersion))
                     {

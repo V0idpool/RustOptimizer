@@ -15,6 +15,7 @@ namespace RustOptimizer.Core
         public static string AutoFlushUnit { get; set; } = "Minutes";
         public static bool CPUHighPriority { get; set; } = false;
         public static string GameConfigPath { get; private set; } = Path.Combine("cfg", "client.cfg");
+        public static bool PCoresOnly { get; set; } = false;
 
         public static void SetGamePath(string gamePath)
         {
@@ -48,7 +49,7 @@ namespace RustOptimizer.Core
             AutoFlushInterval = ini.GetInteger("AppSettings", "FlushInterval", 15);
             AutoFlushUnit = ini.ReadValue("AppSettings", "FlushUnit", "Minutes");
             CPUHighPriority = ini.GetBoolean("AppSettings", "CPUHighPriority", false);
-
+            PCoresOnly = ini.GetBoolean("AppSettings", "PhysicalCoresOnly", false);
         }
 
         private static string NormalizeGamePath(string gamePath)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualBasic.CompilerServices;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Runtime.InteropServices;
@@ -9,8 +10,7 @@ namespace RustOptimizer.GUI
 
     // IMPORTANT:
     // Please leave these comments in place as they help protect intellectual rights and allow
-    // developers to determine the version of the theme they are using. The preffered method
-    // of distributing this theme is through the Nimoru Software home page at nimoru.com.
+    // developers to determine the version of the theme they are using.
 
     // Name: Rust Optimizer V2 Theme
     // Created: 5/30/2026
@@ -36,7 +36,21 @@ namespace RustOptimizer.GUI
             TextBitmap = new Bitmap(1, 1);
             TextGraphics = Graphics.FromImage(TextBitmap);
         }
+        public static GraphicsPath GetResponsiveRoundedPath(Rectangle rect, int radius)
+        {
+            GraphicsPath path = new GraphicsPath();
+            // Safely clamp the radius so it never exceeds the control's dimensions
+            int safeRadius = Math.Max(1, Math.Min(radius, Math.Min(rect.Width / 2, rect.Height / 2)));
+            int curveSize = safeRadius * 2;
 
+            path.AddArc(rect.X, rect.Y, curveSize, curveSize, 180, 90);
+            path.AddArc(rect.Right - curveSize, rect.Y, curveSize, curveSize, 270, 90);
+            path.AddArc(rect.Right - curveSize, rect.Bottom - curveSize, curveSize, curveSize, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - curveSize, curveSize, curveSize, 90, 90);
+            path.CloseFigure();
+
+            return path;
+        }
         internal static SizeF MeasureString(string text, Font font)
         {
             return TextGraphics.MeasureString(text, font);
@@ -88,6 +102,396 @@ namespace RustOptimizer.GUI
         public override Color SeparatorDark => BorderColor;
         public override Color SeparatorLight => BackColor;
     }
+
+    public class ResponsiveActionCard : Control
+    {
+        public string Title { get; set; } = "Quick Action";
+        public string Subtitle { get; set; } = "Description.";
+        public Image Icon { get; set; }
+
+        private bool isHovered = false;
+
+        public ResponsiveActionCard()
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
+                     ControlStyles.ResizeRedraw | ControlStyles.OptimizedDoubleBuffer, true);
+            Size = new Size(250, 80);
+            Cursor = Cursors.Hand;
+        }
+
+        protected override void OnMouseEnter(EventArgs e) { isHovered = true; Invalidate(); }
+        protected override void OnMouseLeave(EventArgs e) { isHovered = false; Invalidate(); }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+            Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
+            int cornerRadius = (int)(Math.Min(Width, Height) * 0.15f);
+
+            Color surfaceColor = isHovered ? Color.FromArgb(42, 38, 35) : Color.FromArgb(28, 25, 23);
+
+            using (GraphicsPath path = ThemeModule.GetResponsiveRoundedPath(rect, cornerRadius))
+            using (SolidBrush brush = new SolidBrush(surfaceColor))
+            {
+                g.FillPath(brush, path);
+
+                if (isHovered)
+                {
+                    using (Pen glowPen = new Pen(Color.FromArgb(80, 224, 83, 40), 2f))
+                        g.DrawPath(glowPen, path);
+                }
+                else
+                {
+                    using (Pen pen = new Pen(Color.FromArgb(44, 38, 34), 1))
+                        g.DrawPath(pen, path);
+                }
+            }
+
+            int iconBoxSize = (int)(Height * 0.70f);
+            int padding = (Height - iconBoxSize) / 2;
+            Rectangle iconRect = new Rectangle(padding, padding, iconBoxSize, iconBoxSize);
+
+            using (GraphicsPath iconBg = ThemeModule.GetResponsiveRoundedPath(iconRect, (int)(iconBoxSize * 0.2f)))
+            using (LinearGradientBrush iconBrush = new LinearGradientBrush(iconRect, Color.FromArgb(35, 30, 28), Color.FromArgb(20, 18, 16), 45f))
+            {
+                g.FillPath(iconBrush, iconBg);
+            }
+
+            if (Icon != null)
+            {
+                int imgSize = (int)(iconBoxSize * 0.8f);
+                int imgPadding = (iconBoxSize - imgSize) / 2;
+                Rectangle imgRect = new Rectangle(iconRect.X + imgPadding, iconRect.Y + imgPadding, imgSize, imgSize);
+                g.DrawImage(Icon, imgRect);
+            }
+
+            int textX = iconRect.Right + padding;
+            float titleSize = Math.Max(8f, Height * 0.16f);
+            float subSize = Math.Max(6f, Height * 0.11f);
+
+            using (Font titleFont = new Font("Segoe UI", titleSize, FontStyle.Bold))
+            using (Font subFont = new Font("Segoe UI", subSize, FontStyle.Regular))
+            {
+                TextRenderer.DrawText(g, Title, titleFont, new Point(textX, padding + (int)(Height * 0.05f)), Color.FromArgb(245, 240, 235));
+                TextRenderer.DrawText(g, Subtitle, subFont, new Point(textX, Height / 2), Color.FromArgb(160, 150, 140));
+            }
+        }
+    }
+
+    public class ResponsiveLaunchButton : Control
+    {
+        private bool isHovered, isPressed;
+
+        public ResponsiveLaunchButton()
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
+                     ControlStyles.ResizeRedraw | ControlStyles.OptimizedDoubleBuffer, true);
+            Size = new Size(250, 60);
+            Cursor = Cursors.Hand;
+        }
+
+        protected override void OnMouseEnter(EventArgs e) { isHovered = true; Invalidate(); }
+        protected override void OnMouseLeave(EventArgs e) { isHovered = false; Invalidate(); }
+        protected override void OnMouseDown(MouseEventArgs e) { isPressed = true; Invalidate(); }
+        protected override void OnMouseUp(MouseEventArgs e) { isPressed = false; Invalidate(); }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+            Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
+            int radius = (int)(Height * 0.25f);
+
+            Color topColor = Color.FromArgb(235, 90, 45);
+            Color botColor = Color.FromArgb(200, 60, 20);
+
+            if (isPressed)
+            {
+                topColor = Color.FromArgb(190, 50, 15);
+                botColor = Color.FromArgb(160, 40, 10);
+            }
+            else if (isHovered)
+            {
+                topColor = Color.FromArgb(255, 110, 55);
+                botColor = Color.FromArgb(220, 80, 30);
+            }
+
+            using (GraphicsPath path = ThemeModule.GetResponsiveRoundedPath(rect, radius))
+            using (LinearGradientBrush brush = new LinearGradientBrush(rect, topColor, botColor, 90f))
+            {
+                g.FillPath(brush, path);
+            }
+
+            float fontSize = Math.Max(10f, Height * 0.35f);
+            string buttonText = string.IsNullOrEmpty(this.Text) ? "LAUNCH RUST" : this.Text;
+
+            using (Font dynamicFont = new Font("Segoe UI Black", fontSize, FontStyle.Bold))
+            {
+                Size textSize = TextRenderer.MeasureText(g, buttonText, dynamicFont);
+
+                int triSize = (int)(Height * 0.30f);
+                int actualTriWidth = (int)(triSize * 1.5f);
+                int spacing = (int)(Height * 0.15f);
+
+                int totalContentWidth = actualTriWidth + spacing + textSize.Width;
+                int startX = (Width - totalContentWidth) / 2;
+                int iconCenterY = Height / 2;
+
+                int iconCenterX = startX + (triSize / 2);
+                Point[] triangle = new Point[]
+                {
+            new Point(iconCenterX - (triSize/2), iconCenterY - triSize),
+            new Point(iconCenterX - (triSize/2), iconCenterY + triSize),
+            new Point(iconCenterX + triSize, iconCenterY)
+                };
+                g.FillPolygon(Brushes.White, triangle);
+
+                Rectangle textRect = new Rectangle(startX + actualTriWidth + spacing, 0, textSize.Width, Height);
+                TextRenderer.DrawText(g, buttonText, dynamicFont, textRect, Color.White, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+            }
+        }
+    }
+
+    public class ResponsiveToggle : Control
+    {
+        public bool Checked { get; set; }
+        public event EventHandler CheckedChanged;
+
+        public ResponsiveToggle()
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
+                     ControlStyles.ResizeRedraw | ControlStyles.OptimizedDoubleBuffer, true);
+            Size = new Size(45, 20);
+            Cursor = Cursors.Hand;
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            Checked = !Checked;
+            CheckedChanged?.Invoke(this, EventArgs.Empty);
+            Invalidate();
+            base.OnClick(e);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
+            Color trackColor = Checked ? Color.Green : Color.FromArgb(60,60,60);
+
+            using (GraphicsPath path = ThemeModule.GetResponsiveRoundedPath(rect, Height / 2))
+            using (SolidBrush brush = new SolidBrush(trackColor))
+            {
+                g.FillPath(brush, path);
+            }
+
+            int padding = (int)(Height * 0.1f);
+            int thumbSize = Height - (padding * 2) - 1;
+            int thumbX = Checked ? (Width - thumbSize - padding - 1) : padding;
+
+            Rectangle thumbRect = new Rectangle(thumbX, padding, thumbSize, thumbSize);
+
+            using (GraphicsPath thumbPath = ThemeModule.GetResponsiveRoundedPath(thumbRect, thumbSize / 2))
+            using (SolidBrush thumbBrush = new SolidBrush(Color.FromArgb(245, 240, 235)))
+            {
+                g.FillPath(thumbBrush, thumbPath);
+            }
+        }
+    }
+
+    public class ResponsiveSidebarItem : Control
+    {
+        private bool isHovered = false;
+        private bool isSelected = false;
+
+        public bool Selected
+        {
+            get => isSelected;
+            set { isSelected = value; Invalidate(); }
+        }
+
+        public ResponsiveSidebarItem()
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
+                     ControlStyles.ResizeRedraw | ControlStyles.OptimizedDoubleBuffer, true);
+            Size = new Size(200, 50);
+            Cursor = Cursors.Hand;
+        }
+
+        protected override void OnMouseEnter(EventArgs e) { isHovered = true; Invalidate(); }
+        protected override void OnMouseLeave(EventArgs e) { isHovered = false; Invalidate(); }
+        protected override void OnClick(EventArgs e) { Selected = true; base.OnClick(e); }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+            Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
+
+            if (isSelected)
+                g.FillRectangle(new SolidBrush(Color.FromArgb(38, 34, 30)), rect);
+            else if (isHovered)
+                g.FillRectangle(new SolidBrush(Color.FromArgb(28, 25, 23)), rect);
+            else
+                g.FillRectangle(new SolidBrush(Color.FromArgb(20, 18, 16)), rect);
+
+            if (isSelected)
+            {
+                int lineHt = (int)(Height * 0.6f);
+                int lineY = (Height - lineHt) / 2;
+                using (GraphicsPath path = ThemeModule.GetResponsiveRoundedPath(new Rectangle(2, lineY, 4, lineHt), 2))
+                using (SolidBrush accent = new SolidBrush(Color.FromArgb(224, 83, 40)))
+                {
+                    g.FillPath(accent, path);
+                }
+            }
+
+            float fontSize = Math.Max(9f, Height * 0.22f);
+            Color textColor = isSelected ? Color.White : Color.FromArgb(140, 130, 122);
+
+            using (Font font = new Font("Segoe UI", fontSize, isSelected ? FontStyle.Bold : FontStyle.Regular))
+            {
+                TextRenderer.DrawText(g, Text, font, new Point((int)(Width * 0.15f), (Height - font.Height) / 2), textColor);
+            }
+        }
+    }
+
+    public class ResponsiveStatPill : Control
+    {
+        public string Prefix { get; set; } = "CPU:";
+
+        public ResponsiveStatPill()
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
+                     ControlStyles.ResizeRedraw | ControlStyles.OptimizedDoubleBuffer, true);
+            Size = new Size(618, 30);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+            Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
+
+            using (GraphicsPath path = ThemeModule.GetResponsiveRoundedPath(rect, Height / 2))
+            using (SolidBrush brush = new SolidBrush(Color.FromArgb(28, 25, 23)))
+            {
+                g.FillPath(brush, path);
+                g.DrawPath(new Pen(Color.FromArgb(44, 38, 34)), path);
+            }
+
+            float fontSize = Math.Max(7f, Height * 0.35f);
+            using (Font prefixFont = new Font("Segoe UI", fontSize, FontStyle.Bold))
+            using (Font valFont = new Font("Segoe UI", fontSize, FontStyle.Regular))
+            {
+                Point prefixPos = new Point((int)(Height * 0.4f), (Height - prefixFont.Height) / 2);
+                TextRenderer.DrawText(g, Prefix, prefixFont, prefixPos, Color.FromArgb(224, 83, 40));
+
+                int prefixWidth = TextRenderer.MeasureText(Prefix, prefixFont).Width;
+                Point valPos = new Point(prefixPos.X + prefixWidth + 2, prefixPos.Y);
+                TextRenderer.DrawText(g, Text, valFont, valPos, Color.FromArgb(237, 232, 228));
+            }
+        }
+    }
+
+    public class AboutLinkTile : Control
+    {
+        public string Title { get; set; } = "Link Title";
+        public string Url { get; set; } = "";
+        public Image Icon { get; set; }
+
+        private bool isHovered = false;
+
+        public AboutLinkTile()
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
+                     ControlStyles.ResizeRedraw | ControlStyles.OptimizedDoubleBuffer, true);
+            Size = new Size(220, 52);
+            Cursor = Cursors.Hand;
+        }
+
+        protected override void OnMouseEnter(EventArgs e) { isHovered = true; Invalidate(); }
+        protected override void OnMouseLeave(EventArgs e) { isHovered = false; Invalidate(); }
+
+        protected override void OnClick(EventArgs e)
+        {
+            base.OnClick(e);
+            if (!string.IsNullOrWhiteSpace(Url))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(Url) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Could not open link: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+            Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
+            Color surfaceColor = isHovered ? Color.FromArgb(40, 40, 40) : Color.FromArgb(30, 30, 30);
+            Color borderColor = isHovered ? Color.FromArgb(224, 83, 40) : Color.FromArgb(44, 38, 34);
+
+            using (GraphicsPath path = ThemeModule.GetResponsiveRoundedPath(rect, 8))
+            using (SolidBrush brush = new SolidBrush(surfaceColor))
+            using (Pen pen = new Pen(borderColor, 1))
+            {
+                g.FillPath(brush, path);
+                g.DrawPath(pen, path);
+            }
+
+            int iconBox = (int)(Height * 0.65f);
+            int pad = (Height - iconBox) / 2;
+            Rectangle iconRect = new Rectangle(pad, pad, iconBox, iconBox);
+
+            using (GraphicsPath iconBg = ThemeModule.GetResponsiveRoundedPath(iconRect, 6))
+            using (SolidBrush iconBrush = new SolidBrush(Color.FromArgb(20, 18, 16)))
+            {
+                g.FillPath(iconBrush, iconBg);
+            }
+
+            if (Icon != null)
+            {
+                int imgSize = (int)(iconBox * 0.7f);
+                int offset = (iconBox - imgSize) / 2;
+                g.DrawImage(Icon, new Rectangle(iconRect.X + offset, iconRect.Y + offset, imgSize, imgSize));
+            }
+
+            int textX = iconRect.Right + 10;
+            using (Font font = new Font("Segoe UI", 9.5f, FontStyle.Bold))
+            {
+                TextRenderer.DrawText(g, Title, font, new Point(textX, (Height - font.Height) / 2), Color.FromArgb(237, 232, 228));
+            }
+
+            using (Font arrowFont = new Font("Segoe UI", 10f, FontStyle.Regular))
+            {
+                Color arrowColor = isHovered ? Color.FromArgb(224, 83, 40) : Color.FromArgb(140, 130, 122);
+                TextRenderer.DrawText(g, "↗", arrowFont, new Point(Width - 24, (Height - arrowFont.Height) / 2), arrowColor);
+            }
+        }
+    }
+
+
     [DefaultEvent("TextChanged")]
     public class ROTextBox : Control
     {
@@ -390,8 +794,8 @@ namespace RustOptimizer.GUI
                 path.AddArc(mainRect.Right - radius * 2, mainRect.Bottom - radius * 2, radius * 2, radius * 2, 0, 90);
                 path.AddArc(mainRect.X, mainRect.Bottom - radius * 2, radius * 2, radius * 2, 90, 90);
                 path.CloseFigure();
-
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(40, 40, 40)))
+             
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(30, 30, 30)))
                 {
                     e.Graphics.FillPath(brush, path);
                 }
@@ -795,10 +1199,10 @@ namespace RustOptimizer.GUI
 
             Font = new Font("Segoe UI", 11.25f, FontStyle.Bold);
 
-            B1 = new SolidBrush(Color.Orange);
+            B1 = new SolidBrush(Color.FromArgb(224, 83, 40));
         }
 
-        public string _Value1 = "NET";
+        public string _Value1 = "LABEL";
         public string Value1
         {
             get
@@ -812,7 +1216,7 @@ namespace RustOptimizer.GUI
             }
         }
 
-        public string _Value2 = "SEAL";
+        public string _Value2 = "TEXT";
         public string Value2
         {
             get
@@ -872,7 +1276,7 @@ namespace RustOptimizer.GUI
 
             B1 = new SolidBrush(Color.FromArgb(50, 50, 50));
             B2 = new SolidBrush(Color.FromArgb(35, 35, 35));
-            B3 = new SolidBrush(Color.FromArgb(205, 150, 0));
+            B3 = new SolidBrush(Color.FromArgb(224, 83, 40));
             B4 = new SolidBrush(Color.FromArgb(65, 65, 65));
 
             SF1 = new StringFormat();

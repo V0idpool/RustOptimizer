@@ -21,11 +21,26 @@ namespace RustOptimizer.Core
 
         [DllImport("advapi32.dll", SetLastError = true)]
         private static extern bool AdjustTokenPrivileges(IntPtr TokenHandle, bool DisableAllPrivileges, ref TOKEN_PRIVILEGES NewState, uint BufferLength, IntPtr PreviousState, IntPtr ReturnLength);
+
         [DllImport("winmm.dll")]
         private static extern long mciSendString(string strCommand, System.Text.StringBuilder strReturn, int iReturnLength, IntPtr hwndCallback);
 
         [DllImport("ntdll.dll")]
         private static extern int NtSetSystemInformation(int SystemInformationClass, IntPtr SystemInformation, int SystemInformationLength);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GetLogicalProcessorInformation(IntPtr Buffer, ref uint ReturnLength);
+
+        private const int RelationProcessorCore = 0;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+        {
+            public UIntPtr ProcessorMask;
+            public int Relationship;
+            public long UnionPad1;
+            public long UnionPad2;
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         private struct LUID
@@ -41,8 +56,10 @@ namespace RustOptimizer.Core
             public LUID Luid;
             public uint Attributes;
         }
-        private static System.Timers.Timer PriorityTimer;
+        private static System.Timers.Timer ProcessWatchdog;
         private static bool WantsHighPriority = false;
+        private static bool WantsPCoresOnly = false;
+        private static long CachedPhysicalCoreMask = 0;
 
         /// <summary>
         /// This method gets the right settings for a specific profile, like Competitive or Ultra.
@@ -334,54 +351,159 @@ namespace RustOptimizer.Core
         {
            FlushStandbyList(isAutoFlush: true);
         }
+
         /// <summary>
-        /// Set Rusts processor priority to high for performance gains.
+        /// Asks the Windows Kernel for the true CPU cores.
+        /// Extracts exactly one logical thread for every physical core.
+        /// </summary>
+        private static long GetPhysicalCoreMask()
+        {
+            if (CachedPhysicalCoreMask != 0) return CachedPhysicalCoreMask;
+
+            uint returnLength = 0;
+            GetLogicalProcessorInformation(IntPtr.Zero, ref returnLength);
+            if (returnLength == 0) return 0;
+
+            IntPtr buffer = Marshal.AllocHGlobal((int)returnLength);
+            try
+            {
+                if (GetLogicalProcessorInformation(buffer, ref returnLength))
+                {
+                    int size = Marshal.SizeOf(typeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
+                    int count = (int)returnLength / size;
+                    long physicalMask = 0;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        IntPtr itemAddr = new IntPtr(buffer.ToInt64() + (i * size));
+                        var info = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION)Marshal.PtrToStructure(itemAddr, typeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
+
+                        if (info.Relationship == RelationProcessorCore)
+                        {
+                            long coreMask = (long)info.ProcessorMask;
+                            physicalMask |= (coreMask & -coreMask);
+                        }
+                    }
+                    CachedPhysicalCoreMask = physicalMask;
+                    return physicalMask;
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(buffer);
+            }
+
+            return 0; // Fallback
+        }
+
+        /// <summary>
+        /// Enables or disables high process priority monitoring for Rust.
         /// </summary>
         public static void SetPriority(bool high)
         {
             WantsHighPriority = high;
-
-            if (PriorityTimer == null)
-            {
-                PriorityTimer = new System.Timers.Timer();
-                PriorityTimer.Interval = 5000;
-                PriorityTimer.Elapsed += ActivePriorityCheck;
-                PriorityTimer.Start();
-            }
-
-            ActivePriorityCheck(null, null);
+            EnsureWatchdogState();
+            TriggerImmediateCheck();
         }
 
         /// <summary>
-        /// Actively monitors for RustClient.exe and applies the desired priority.
+        /// Restricts RustClient.exe execution to physical CPU cores, bypassing SMT/Hyper-Threading.
         /// </summary>
-        private static void ActivePriorityCheck(object sender, ElapsedEventArgs e)
+        public static void SetCpuAffinity(bool physicalOnly)
+        {
+            WantsPCoresOnly = physicalOnly;
+            EnsureWatchdogState();
+            TriggerImmediateCheck();
+        }
+        /// <summary>
+        /// Starts the background monitor if any optimization feature is enabled,
+        /// or stops it to save background resources when all are disabled.
+        /// </summary>
+        private static void EnsureWatchdogState()
+        {
+            bool needsMonitoring = WantsHighPriority || WantsPCoresOnly;
+
+            if (needsMonitoring)
+            {
+                if (ProcessWatchdog == null)
+                {
+                    ProcessWatchdog = new System.Timers.Timer(5000);
+                    ProcessWatchdog.Elapsed += (s, e) => ProcessWatchdog_Tick();
+                    ProcessWatchdog.AutoReset = true;
+                    ProcessWatchdog.Start();
+                }
+            }
+            else if (ProcessWatchdog != null)
+            {
+                ProcessWatchdog.Stop();
+                ProcessWatchdog.Dispose();
+                ProcessWatchdog = null;
+            }
+        }
+
+        private static void TriggerImmediateCheck()
+        {
+            Task.Run(() => ProcessWatchdog_Tick());
+        }
+
+        /// <summary>
+        /// Shared monitor polling loop. Iterates game instances once and dispatches to modular workers.
+        /// </summary>
+        private static void ProcessWatchdog_Tick()
         {
             try
             {
                 Process[] rustProcesses = Process.GetProcessesByName("RustClient");
+                if (rustProcesses.Length == 0) return;
 
                 foreach (Process p in rustProcesses)
                 {
-                    ProcessPriorityClass targetPriority = WantsHighPriority ? ProcessPriorityClass.High : ProcessPriorityClass.Normal;
-
-                    if (p.PriorityClass != targetPriority)
-                    {
-                        p.PriorityClass = targetPriority;
-                    }
+                    ApplyProcessPriority(p);
+                    ApplyProcessAffinity(p);
                 }
             }
-            catch (System.ComponentModel.Win32Exception)
-            {
-                // Catch "Access Denied" errors silently, this stops the background thread from crashing or spamming your log file.
-            }
-            catch (InvalidOperationException)
-            {
-                // Silently catch if the game closes while the loop is checking it.
-            }
+            catch (System.ComponentModel.Win32Exception) {  /* Catch "Access Denied" errors silently, this stops the background thread from crashing or spamming your log file. */}
+            catch (InvalidOperationException) { /* Silently catch if the game closes while the loop is checking it. */ }
             catch (Exception ex)
             {
                 ExceptionHandler.LogError(ex);
+            }
+        }
+        /// <summary>
+        /// Applies the requested ProcessPriorityClass.
+        /// </summary>
+        private static void ApplyProcessPriority(Process p)
+        {
+            ProcessPriorityClass targetPriority = WantsHighPriority
+                ? ProcessPriorityClass.High
+                : ProcessPriorityClass.Normal;
+
+            if (p.PriorityClass != targetPriority)
+            {
+                p.PriorityClass = targetPriority;
+            }
+        }
+
+        /// <summary>
+        /// Calculates and applies the processor affinity mask.
+        /// </summary>
+        private static void ApplyProcessAffinity(Process p)
+        {
+            long targetMask = 0;
+
+            if (WantsPCoresOnly)
+            {
+                targetMask = GetPhysicalCoreMask();
+            }
+
+            if (targetMask == 0)
+            {
+                targetMask = Environment.ProcessorCount >= 64 ? -1L : (1L << Environment.ProcessorCount) - 1;
+            }
+
+            if ((long)p.ProcessorAffinity != targetMask)
+            {
+                p.ProcessorAffinity = (IntPtr)targetMask;
             }
         }
     }

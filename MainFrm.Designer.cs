@@ -1,4 +1,6 @@
-﻿namespace RustOptimizer
+﻿using RustOptimizer.GUI;
+
+namespace RustOptimizer
 {
     partial class MainFrm
     {
@@ -29,24 +31,23 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainFrm));
-            ROGroupBox1 = new GUI.ROGroupBox();
-            launchButton1 = new GUI.LaunchButton();
-            ROLabel1 = new GUI.ROLabel();
+            ROGroupBox1 = new ROGroupBox();
+            launchButton1 = new ResponsiveLaunchButton();
+            label1 = new Label();
+            ROLabel1 = new ROLabel();
+            linkLabel1 = new LinkLabel();
+            gamePathString = new ROTextBox();
+            gamePathSelectBtn = new ROButton();
             linkLabel2 = new LinkLabel();
-            gamePathString = new GUI.ROTextBox();
-            gamePathSelectBtn = new GUI.ROButton();
-            ROGroupBox2 = new GUI.ROGroupBox();
-            lblRAMInfo = new Label();
-            lblGPUInfo = new Label();
-            lblCPUInfo = new Label();
-            ROLabel4 = new GUI.ROLabel();
-            ROLabel3 = new GUI.ROLabel();
-            ROLabel2 = new GUI.ROLabel();
-            ROGroupBox3 = new GUI.ROGroupBox();
-            autoDetectBtn = new GUI.ROButton();
-            optimizeBtn = new GUI.ROButton();
-            ROLabel5 = new GUI.ROLabel();
-            profileDropdown = new GUI.ROComboBox();
+            ROGroupBox2 = new ROGroupBox();
+            lblRAMInfo = new ResponsiveStatPill();
+            lblGPUInfo = new ResponsiveStatPill();
+            lblCPUInfo = new ResponsiveStatPill();
+            ROGroupBox3 = new ROGroupBox();
+            autoDetectBtn = new ROButton();
+            optimizeBtn = new ROButton();
+            ROLabel5 = new ROLabel();
+            profileDropdown = new ROComboBox();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             backUpLocationToolStripMenuItem = new ToolStripMenuItem();
@@ -66,28 +67,28 @@
             donateToolStripMenuItem = new ToolStripMenuItem();
             flushRamToolStripMenuItem = new ToolStripMenuItem();
             minimizeToTrayToolStripMenuItem = new ToolStripMenuItem();
-            ROGroupBox4 = new GUI.ROGroupBox();
-            saveBackupBtn = new GUI.ROButton();
-            restoreBackupBtn = new GUI.ROButton();
-            ROLabel6 = new GUI.ROLabel();
-            backupDropdown = new GUI.ROComboBox();
-            ROGroupBox5 = new GUI.ROGroupBox();
-            ROTabControl1 = new GUI.ROTabControl();
+            ROGroupBox4 = new ROGroupBox();
+            saveBackupBtn = new ROButton();
+            restoreBackupBtn = new ROButton();
+            ROLabel6 = new ROLabel();
+            backupDropdown = new ROComboBox();
+            ROGroupBox5 = new ROGroupBox();
+            ROTabControl1 = new ROTabControl();
             tabPage2 = new TabPage();
-            ROLabel10 = new GUI.ROLabel();
-            highPriority = new GUI.ROCheckBox();
+            roLabel3 = new ROLabel();
+            pCoresToggle = new ResponsiveToggle();
+            ROLabel10 = new ROLabel();
+            highPriority = new ResponsiveToggle();
             tabPage1 = new TabPage();
-            ROLabel7 = new GUI.ROLabel();
-            autoFlushChk = new GUI.ROCheckBox();
-            ROLabel9 = new GUI.ROLabel();
+            ROLabel7 = new ROLabel();
+            autoFlushChk = new ResponsiveToggle();
+            ROLabel9 = new ROLabel();
             autoFlushinterval = new NumericUpDown();
-            ROLabel8 = new GUI.ROLabel();
-            autoFlushMinHour = new GUI.ROComboBox();
-            autoFlushSound = new GUI.ROCheckBox();
-            ROSeperator1 = new GUI.ROSeperator();
-            saveAdvancedCfgBtn = new GUI.ROButton();
-            linkLabel1 = new LinkLabel();
-            label1 = new Label();
+            ROLabel8 = new ROLabel();
+            autoFlushMinHour = new ROComboBox();
+            autoFlushSound = new ResponsiveToggle();
+            ROSeperator1 = new ROSeperator();
+            saveAdvancedCfgBtn = new ROButton();
             linkLabel3 = new LinkLabel();
             ROGroupBox1.SuspendLayout();
             ROGroupBox2.SuspendLayout();
@@ -113,7 +114,7 @@
             ROGroupBox1.Font = new Font("Segoe UI", 10F);
             ROGroupBox1.Location = new Point(12, 37);
             ROGroupBox1.Name = "ROGroupBox1";
-            ROGroupBox1.Padding = new Padding(10, 45, 10, 10);
+            ROGroupBox1.Padding = new Padding(16, 50, 16, 16);
             ROGroupBox1.Size = new Size(642, 137);
             ROGroupBox1.SubTitle = "Select the folder your game is installed in.";
             ROGroupBox1.TabIndex = 0;
@@ -122,7 +123,7 @@
             // 
             // launchButton1
             // 
-            launchButton1.BackColor = Color.Transparent;
+            launchButton1.BackColor = Color.FromArgb(30, 30, 30);
             launchButton1.Font = new Font("Segoe UI", 15F, FontStyle.Bold);
             launchButton1.Location = new Point(15, 82);
             launchButton1.Name = "launchButton1";
@@ -131,9 +132,20 @@
             launchButton1.Text = "LAUNCH RUST";
             launchButton1.Click += launchButton1_Click;
             // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.Location = new Point(420, 5);
+            label1.Name = "label1";
+            label1.Size = new Size(198, 15);
+            label1.TabIndex = 13;
+            label1.Text = "Like what I do? Consider Donating:";
+            label1.Click += label1_Click;
+            // 
             // ROLabel1
             // 
-            ROLabel1.BackColor = Color.FromArgb(40, 40, 40);
+            ROLabel1.BackColor = Color.FromArgb(30, 30, 30);
             ROLabel1.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
             ROLabel1.Location = new Point(9, 46);
             ROLabel1.Name = "ROLabel1";
@@ -143,18 +155,18 @@
             ROLabel1.Value1 = " ";
             ROLabel1.Value2 = " Game Path:";
             // 
-            // linkLabel2
+            // linkLabel1
             // 
-            linkLabel2.AutoSize = true;
-            linkLabel2.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            linkLabel2.LinkColor = Color.Orange;
-            linkLabel2.Location = new Point(12, 679);
-            linkLabel2.Name = "linkLabel2";
-            linkLabel2.Size = new Size(125, 17);
-            linkLabel2.TabIndex = 14;
-            linkLabel2.TabStop = true;
-            linkLabel2.Text = "https://voidtech.xyz/";
-            linkLabel2.LinkClicked += linkLabel2_LinkClicked;
+            linkLabel1.AutoSize = true;
+            linkLabel1.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            linkLabel1.LinkColor = Color.FromArgb(224, 83, 40);
+            linkLabel1.Location = new Point(397, 20);
+            linkLabel1.Name = "linkLabel1";
+            linkLabel1.Size = new Size(258, 17);
+            linkLabel1.TabIndex = 13;
+            linkLabel1.TabStop = true;
+            linkLabel1.Text = "https://buymeacoffee.com/rustforgedev";
+            linkLabel1.LinkClicked += linkLabel1_LinkClicked;
             // 
             // gamePathString
             // 
@@ -180,20 +192,30 @@
             gamePathSelectBtn.Text = "Open...";
             gamePathSelectBtn.Click += gamePathSelectBtn_Click;
             // 
+            // linkLabel2
+            // 
+            linkLabel2.AutoSize = true;
+            linkLabel2.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            linkLabel2.LinkColor = Color.FromArgb(224, 83, 40);
+            linkLabel2.Location = new Point(12, 694);
+            linkLabel2.Name = "linkLabel2";
+            linkLabel2.Size = new Size(125, 17);
+            linkLabel2.TabIndex = 14;
+            linkLabel2.TabStop = true;
+            linkLabel2.Text = "https://voidtech.xyz/";
+            linkLabel2.LinkClicked += linkLabel2_LinkClicked;
+            // 
             // ROGroupBox2
             // 
             ROGroupBox2.BackColor = Color.Transparent;
             ROGroupBox2.Controls.Add(lblRAMInfo);
             ROGroupBox2.Controls.Add(lblGPUInfo);
             ROGroupBox2.Controls.Add(lblCPUInfo);
-            ROGroupBox2.Controls.Add(ROLabel4);
-            ROGroupBox2.Controls.Add(ROLabel3);
-            ROGroupBox2.Controls.Add(ROLabel2);
             ROGroupBox2.Font = new Font("Segoe UI", 10F);
             ROGroupBox2.Location = new Point(12, 180);
             ROGroupBox2.Name = "ROGroupBox2";
-            ROGroupBox2.Padding = new Padding(10, 45, 10, 10);
-            ROGroupBox2.Size = new Size(642, 144);
+            ROGroupBox2.Padding = new Padding(16, 50, 16, 16);
+            ROGroupBox2.Size = new Size(642, 159);
             ROGroupBox2.SubTitle = "These are your hardware specs.";
             ROGroupBox2.TabIndex = 1;
             ROGroupBox2.Text = "ROGroupBox2";
@@ -201,66 +223,30 @@
             // 
             // lblRAMInfo
             // 
-            lblRAMInfo.AutoSize = true;
-            lblRAMInfo.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblRAMInfo.Location = new Point(56, 107);
+            lblRAMInfo.BackColor = Color.FromArgb(30, 30, 30);
+            lblRAMInfo.Location = new Point(12, 121);
             lblRAMInfo.Name = "lblRAMInfo";
-            lblRAMInfo.Size = new Size(0, 21);
-            lblRAMInfo.TabIndex = 5;
+            lblRAMInfo.Prefix = "RAM:";
+            lblRAMInfo.Size = new Size(618, 30);
+            lblRAMInfo.TabIndex = 8;
             // 
             // lblGPUInfo
             // 
-            lblGPUInfo.AutoSize = true;
-            lblGPUInfo.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblGPUInfo.Location = new Point(56, 78);
+            lblGPUInfo.BackColor = Color.FromArgb(30, 30, 30);
+            lblGPUInfo.Location = new Point(12, 85);
             lblGPUInfo.Name = "lblGPUInfo";
-            lblGPUInfo.Size = new Size(0, 21);
-            lblGPUInfo.TabIndex = 4;
+            lblGPUInfo.Prefix = "GPU:";
+            lblGPUInfo.Size = new Size(618, 30);
+            lblGPUInfo.TabIndex = 7;
             // 
             // lblCPUInfo
             // 
-            lblCPUInfo.AutoSize = true;
-            lblCPUInfo.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblCPUInfo.Location = new Point(55, 49);
+            lblCPUInfo.BackColor = Color.FromArgb(30, 30, 30);
+            lblCPUInfo.Location = new Point(12, 49);
             lblCPUInfo.Name = "lblCPUInfo";
-            lblCPUInfo.Size = new Size(0, 21);
-            lblCPUInfo.TabIndex = 3;
-            // 
-            // ROLabel4
-            // 
-            ROLabel4.BackColor = Color.FromArgb(40, 40, 40);
-            ROLabel4.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
-            ROLabel4.Location = new Point(9, 107);
-            ROLabel4.Name = "ROLabel4";
-            ROLabel4.Size = new Size(41, 23);
-            ROLabel4.TabIndex = 2;
-            ROLabel4.Text = "ROLabel4";
-            ROLabel4.Value1 = " ";
-            ROLabel4.Value2 = "Ram:";
-            // 
-            // ROLabel3
-            // 
-            ROLabel3.BackColor = Color.FromArgb(40, 40, 40);
-            ROLabel3.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
-            ROLabel3.Location = new Point(9, 78);
-            ROLabel3.Name = "ROLabel3";
-            ROLabel3.Size = new Size(41, 23);
-            ROLabel3.TabIndex = 1;
-            ROLabel3.Text = "ROLabel3";
-            ROLabel3.Value1 = " ";
-            ROLabel3.Value2 = "GPU:";
-            // 
-            // ROLabel2
-            // 
-            ROLabel2.BackColor = Color.FromArgb(40, 40, 40);
-            ROLabel2.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
-            ROLabel2.Location = new Point(9, 49);
-            ROLabel2.Name = "ROLabel2";
-            ROLabel2.Size = new Size(41, 23);
-            ROLabel2.TabIndex = 0;
-            ROLabel2.Text = "ROLabel2";
-            ROLabel2.Value1 = " ";
-            ROLabel2.Value2 = "CPU:";
+            lblCPUInfo.Prefix = "CPU:";
+            lblCPUInfo.Size = new Size(618, 30);
+            lblCPUInfo.TabIndex = 6;
             // 
             // ROGroupBox3
             // 
@@ -270,9 +256,9 @@
             ROGroupBox3.Controls.Add(ROLabel5);
             ROGroupBox3.Controls.Add(profileDropdown);
             ROGroupBox3.Font = new Font("Segoe UI", 10F);
-            ROGroupBox3.Location = new Point(12, 330);
+            ROGroupBox3.Location = new Point(12, 345);
             ROGroupBox3.Name = "ROGroupBox3";
-            ROGroupBox3.Padding = new Padding(10, 45, 10, 10);
+            ROGroupBox3.Padding = new Padding(16, 50, 16, 16);
             ROGroupBox3.Size = new Size(311, 144);
             ROGroupBox3.SubTitle = "Select a profile to apply a set of optimized settings.";
             ROGroupBox3.TabIndex = 2;
@@ -303,7 +289,7 @@
             // 
             // ROLabel5
             // 
-            ROLabel5.BackColor = Color.FromArgb(40, 40, 40);
+            ROLabel5.BackColor = Color.FromArgb(30, 30, 30);
             ROLabel5.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
             ROLabel5.Location = new Point(9, 54);
             ROLabel5.Name = "ROLabel5";
@@ -334,7 +320,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, aboutToolStripMenuItem, supportToolStripMenuItem, donateToolStripMenuItem, flushRamToolStripMenuItem, minimizeToTrayToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.RenderMode = ToolStripRenderMode.System;
+            menuStrip1.RenderMode = ToolStripRenderMode.Professional;
             menuStrip1.Size = new Size(666, 24);
             menuStrip1.TabIndex = 3;
             menuStrip1.Text = "menuStrip1";
@@ -496,9 +482,9 @@
             ROGroupBox4.Controls.Add(ROLabel6);
             ROGroupBox4.Controls.Add(backupDropdown);
             ROGroupBox4.Font = new Font("Segoe UI", 10F);
-            ROGroupBox4.Location = new Point(329, 330);
+            ROGroupBox4.Location = new Point(329, 345);
             ROGroupBox4.Name = "ROGroupBox4";
-            ROGroupBox4.Padding = new Padding(10, 45, 10, 10);
+            ROGroupBox4.Padding = new Padding(16, 50, 16, 16);
             ROGroupBox4.Size = new Size(325, 144);
             ROGroupBox4.SubTitle = "Back-up, and Restore your game settings";
             ROGroupBox4.TabIndex = 7;
@@ -529,7 +515,7 @@
             // 
             // ROLabel6
             // 
-            ROLabel6.BackColor = Color.FromArgb(40, 40, 40);
+            ROLabel6.BackColor = Color.FromArgb(30, 30, 30);
             ROLabel6.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold);
             ROLabel6.Location = new Point(9, 54);
             ROLabel6.Name = "ROLabel6";
@@ -559,9 +545,9 @@
             ROGroupBox5.Controls.Add(ROTabControl1);
             ROGroupBox5.Controls.Add(saveAdvancedCfgBtn);
             ROGroupBox5.Font = new Font("Segoe UI", 10F);
-            ROGroupBox5.Location = new Point(12, 480);
+            ROGroupBox5.Location = new Point(12, 495);
             ROGroupBox5.Name = "ROGroupBox5";
-            ROGroupBox5.Padding = new Padding(10, 45, 10, 10);
+            ROGroupBox5.Padding = new Padding(16, 50, 16, 16);
             ROGroupBox5.Size = new Size(642, 196);
             ROGroupBox5.SubTitle = "Set RAM to Auto Flush, and more.";
             ROGroupBox5.TabIndex = 6;
@@ -586,6 +572,8 @@
             // tabPage2
             // 
             tabPage2.BackColor = Color.FromArgb(40, 40, 40);
+            tabPage2.Controls.Add(roLabel3);
+            tabPage2.Controls.Add(pCoresToggle);
             tabPage2.Controls.Add(ROLabel10);
             tabPage2.Controls.Add(highPriority);
             tabPage2.Location = new Point(154, 4);
@@ -594,6 +582,27 @@
             tabPage2.Size = new Size(481, 101);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "General Tools";
+            // 
+            // roLabel3
+            // 
+            roLabel3.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            roLabel3.Location = new Point(6, 36);
+            roLabel3.Name = "roLabel3";
+            roLabel3.Size = new Size(158, 23);
+            roLabel3.TabIndex = 16;
+            roLabel3.Text = "roLabel3";
+            roLabel3.Value1 = " ";
+            roLabel3.Value2 = "Physical Cores Only:";
+            // 
+            // pCoresToggle
+            // 
+            pCoresToggle.Checked = false;
+            pCoresToggle.Font = new Font("Segoe UI", 10F);
+            pCoresToggle.Location = new Point(170, 37);
+            pCoresToggle.Name = "pCoresToggle";
+            pCoresToggle.Size = new Size(45, 20);
+            pCoresToggle.TabIndex = 15;
+            pCoresToggle.Text = "Enable/Disable";
             // 
             // ROLabel10
             // 
@@ -608,12 +617,11 @@
             // 
             // highPriority
             // 
-            highPriority.BackColor = Color.Transparent;
             highPriority.Checked = false;
             highPriority.Font = new Font("Segoe UI", 10F);
-            highPriority.Location = new Point(170, 7);
+            highPriority.Location = new Point(170, 8);
             highPriority.Name = "highPriority";
-            highPriority.Size = new Size(120, 23);
+            highPriority.Size = new Size(45, 20);
             highPriority.TabIndex = 13;
             highPriority.Text = "Enable/Disable";
             // 
@@ -648,12 +656,11 @@
             // 
             // autoFlushChk
             // 
-            autoFlushChk.BackColor = Color.Transparent;
             autoFlushChk.Checked = false;
             autoFlushChk.Font = new Font("Segoe UI", 10F);
-            autoFlushChk.Location = new Point(170, 7);
+            autoFlushChk.Location = new Point(170, 8);
             autoFlushChk.Name = "autoFlushChk";
-            autoFlushChk.Size = new Size(120, 23);
+            autoFlushChk.Size = new Size(45, 20);
             autoFlushChk.TabIndex = 9;
             autoFlushChk.Text = "Enable/Disable";
             autoFlushChk.CheckedChanged += autoFlushChk_CheckedChanged;
@@ -709,12 +716,11 @@
             // 
             // autoFlushSound
             // 
-            autoFlushSound.BackColor = Color.Transparent;
             autoFlushSound.Checked = false;
             autoFlushSound.Font = new Font("Segoe UI", 10F);
-            autoFlushSound.Location = new Point(170, 73);
+            autoFlushSound.Location = new Point(170, 74);
             autoFlushSound.Name = "autoFlushSound";
-            autoFlushSound.Size = new Size(120, 23);
+            autoFlushSound.Size = new Size(45, 20);
             autoFlushSound.TabIndex = 11;
             autoFlushSound.Text = "Enable/Disable";
             autoFlushSound.CheckedChanged += autoFlushSound_CheckedChanged;
@@ -738,36 +744,12 @@
             saveAdvancedCfgBtn.Text = "Save Settings";
             saveAdvancedCfgBtn.Click += saveAdvancedCfgBtn_Click;
             // 
-            // linkLabel1
-            // 
-            linkLabel1.AutoSize = true;
-            linkLabel1.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            linkLabel1.LinkColor = Color.Orange;
-            linkLabel1.Location = new Point(397, 20);
-            linkLabel1.Name = "linkLabel1";
-            linkLabel1.Size = new Size(258, 17);
-            linkLabel1.TabIndex = 13;
-            linkLabel1.TabStop = true;
-            linkLabel1.Text = "https://buymeacoffee.com/rustforgedev";
-            linkLabel1.LinkClicked += linkLabel1_LinkClicked;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(420, 5);
-            label1.Name = "label1";
-            label1.Size = new Size(198, 15);
-            label1.TabIndex = 13;
-            label1.Text = "Like what I do? Consider Donating:";
-            label1.Click += label1_Click;
-            // 
             // linkLabel3
             // 
             linkLabel3.AutoSize = true;
             linkLabel3.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            linkLabel3.LinkColor = Color.Orange;
-            linkLabel3.Location = new Point(446, 679);
+            linkLabel3.LinkColor = Color.FromArgb(224, 83, 40);
+            linkLabel3.Location = new Point(446, 694);
             linkLabel3.Name = "linkLabel3";
             linkLabel3.Size = new Size(225, 17);
             linkLabel3.TabIndex = 15;
@@ -780,7 +762,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
-            ClientSize = new Size(666, 703);
+            ClientSize = new Size(666, 718);
             Controls.Add(linkLabel3);
             Controls.Add(ROGroupBox5);
             Controls.Add(ROGroupBox4);
@@ -790,7 +772,7 @@
             Controls.Add(linkLabel2);
             Controls.Add(menuStrip1);
             ForeColor = Color.White;
-            FormBorderStyle = FormBorderStyle.Fixed3D;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menuStrip1;
             MaximizeBox = false;
@@ -800,7 +782,6 @@
             ROGroupBox1.ResumeLayout(false);
             ROGroupBox1.PerformLayout();
             ROGroupBox2.ResumeLayout(false);
-            ROGroupBox2.PerformLayout();
             ROGroupBox3.ResumeLayout(false);
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
@@ -820,12 +801,9 @@
         private GUI.ROLabel ROLabel1;
         private GUI.ROButton gamePathSelectBtn;
         private GUI.ROGroupBox ROGroupBox2;
-        private Label lblGPUInfo;
-        private Label lblCPUInfo;
-        private GUI.ROLabel ROLabel4;
-        private GUI.ROLabel ROLabel3;
+        private ResponsiveStatPill lblGPUInfo;
         private GUI.ROLabel ROLabel2;
-        private Label lblRAMInfo;
+        private ResponsiveStatPill lblRAMInfo;
         private GUI.ROGroupBox ROGroupBox3;
         private GUI.ROLabel ROLabel5;
         private GUI.ROComboBox profileDropdown;
@@ -857,7 +835,7 @@
         private GUI.ROButton saveAdvancedCfgBtn;
         private GUI.ROLabel ROLabel9;
         private GUI.ROLabel ROLabel8;
-        private GUI.ROCheckBox autoFlushSound;
+        private GUI.ResponsiveToggle autoFlushSound;
         private LinkLabel linkLabel2;
         private LinkLabel linkLabel1;
         private Label label1;
@@ -867,9 +845,9 @@
         private ToolStripMenuItem toolStripMenuItem5;
         private ToolStripMenuItem toolStripMenuItem6;
         private ToolStripMenuItem donateToolStripMenuItem;
-        public GUI.ROCheckBox autoFlushChk;
+        public GUI.ResponsiveToggle autoFlushChk;
         private GUI.ROLabel ROLabel10;
-        public GUI.ROCheckBox highPriority;
+        public GUI.ResponsiveToggle highPriority;
         private ToolStripMenuItem minimizeToTrayToolStripMenuItem;
         private GUI.ROTabControl ROTabControl1;
         private TabPage tabPage1;
@@ -879,7 +857,10 @@
         private ToolStripMenuItem openLogFilePathToolStripMenuItem;
         private ToolStripMenuItem openSettingsFilePathToolStripMenuItem;
         public GUI.ROTextBox gamePathString;
-        private GUI.LaunchButton launchButton1;
+        private GUI.ResponsiveLaunchButton launchButton1;
         private LinkLabel linkLabel3;
+        private GUI.ResponsiveStatPill lblCPUInfo;
+        private ROLabel roLabel3;
+        public ResponsiveToggle pCoresToggle;
     }
 }

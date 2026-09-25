@@ -2,15 +2,18 @@ using RustOptimizer.Core;
 using RustOptimizer.Helpers;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace RustOptimizer
 {
     public partial class MainFrm : Form
     {
+
         public static MainFrm Instance { get; private set; }
         private RustConfig rustConfig = new RustConfig();
         public System.Windows.Forms.Timer autoFlushTimer;
         public NotifyIcon sysTrayIcon;
+
         public MainFrm()
         {
             InitializeComponent();
@@ -21,7 +24,7 @@ namespace RustOptimizer
             menuStrip1.BackColor = Color.FromArgb(40, 40, 40);
         }
 
-        private void MainFrm_Load(object sender, EventArgs e)
+        private async void MainFrm_Load(object sender, EventArgs e)
         {
             _ = Updates.CheckForUpdates();
             System.Version currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
@@ -74,7 +77,8 @@ namespace RustOptimizer
             {
                 autoFlushMinHour.Text = "Minutes";
             }
-
+            pCoresToggle.Checked = UserConfigs.PCoresOnly;
+            Optimizer.SetCpuAffinity(UserConfigs.PCoresOnly);
             autoFlushChk.Checked = UserConfigs.AutoFlushEnabled;
             highPriority.Checked = UserConfigs.CPUHighPriority;
             Optimizer.SetPriority(UserConfigs.CPUHighPriority);
@@ -444,36 +448,9 @@ namespace RustOptimizer
         }
         private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            string titleAbout = "About Rust Optimizer";
-
-            string rtfMessage =
-        @"{\rtf1\ansi\deff0 " +
-        @"{\fonttbl{\f0 Arial;}}" +
-        @"{\colortbl;\red0\green0\blue0;\red255\green128\blue0;\red255\green0\blue0;}" +
-        @"\fs24 " +
-        @"\pard\sa0\sl250\slmult1\cf2 " +
-
-        @"\b\f0\fs28 Rust Optimizer\b0\par " +
-        @"\fs20 A lightweight, open-source Optimization Tool designed specifically to fix Rusts memory leaks and config issues so you can focus on the wipe. Maximize your FPS!\par\par " +
-
-        @"\b\fs24 • Official Website & Documentation:\b0\par " +
-        @"\fs20\hlink https://rustoptimizer.voidtech.xyz/\par\par " +
-
-        @"\b\fs24 • Community & Source Code:\b0\par " +
-        @"\fs20\hlink https://www.nexusmods.com/rust/mods/5\par " +
-        @"\fs20\hlink https://github.com/V0idpool/RustOptimizer\par\par " +
-
-        @"\b\fs24 • Support & Discord:\b0\par " +
-        @"\fs20\hlink https://discord.gg/tfwf9Qr7rG\par\par " +
-
-        @"\b\fs24 • Support Development:\b0\par " +
-        @"\fs20\hlink https://buymeacoffee.com/rustforgedev\par " +
-        @"}";
-
-            using (About aboutForm = new About(rtfMessage))
+            using (About aboutForm = new About())
             {
-                aboutForm.nsGroupBox1.Title = titleAbout;
-                aboutForm.ShowDialog();
+                aboutForm.ShowDialog(this);
             }
         }
         /// <summary>
@@ -564,7 +541,9 @@ namespace RustOptimizer
             ini.WriteValue("AppSettings", "FlushUnit", autoFlushMinHour.Text, ini.Path);
             ini.WriteValue("AppSettings", "FlushSound", autoFlushSound.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
             ini.WriteValue("AppSettings", "CPUHighPriority", highPriority.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
+            ini.WriteValue("AppSettings", "PhysicalCoresOnly", pCoresToggle.Checked.ToString(), ini.Path);
             UserConfigs.Refresh();
+            Optimizer.SetCpuAffinity(pCoresToggle.Checked);
             Optimizer.InitializeAutoFlushTimer();
             Optimizer.SetPriority(highPriority.Checked);
             MessageBox.Show("Settings Saved!", "Rust Optimizer", MessageBoxButtons.OK, MessageBoxIcon.Information);
