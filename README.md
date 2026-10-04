@@ -6,7 +6,7 @@
 ---
 
 ### Official Site
-[https://rustoptimizer.voidtech.xyz](https://rustoptimizer.voidtech.xyz)
+[https://rustoptimizer.us](https://rustoptimizer.us)
 
 ---
 
@@ -45,7 +45,7 @@
 
 ### Useful Links
 
-* **Official Site:** [https://rustoptimizer.voidtech.xyz](https://rustoptimizer.voidtech.xyz)
-* **Downloads:** [https://rustoptimizer.voidtech.xyz/downloads](https://rustoptimizer.voidtech.xyz/downloads)
-* **Support:** [https://discord.gg/tfwf9Qr7rG](https://discord.gg/tfwf9Qr7rG)
+* **Official Site:** [https://rustoptimizer.us](https://rustoptimizer.us)
+* **Downloads:** [https://rustoptimizer.us/downloads](https://rustoptimizer.us/downloads)
+* **Support:** [https://rustoptimizer.us/invite](https://rustoptimizer.us/invite)
 * **Donations:** [https://buymeacoffee.com/rustforgedev](https://buymeacoffee.com/rustforgedev)
