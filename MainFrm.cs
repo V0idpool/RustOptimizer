@@ -1,3 +1,4 @@
+using Microsoft.Win32;
 using RustOptimizer.Core;
 using RustOptimizer.Helpers;
 using System.Diagnostics;
@@ -82,6 +83,18 @@ namespace RustOptimizer
             autoFlushChk.Checked = UserConfigs.AutoFlushEnabled;
             highPriority.Checked = UserConfigs.CPUHighPriority;
             Optimizer.SetPriority(UserConfigs.CPUHighPriority);
+
+            disabledFSO.CheckedChanged -= disabledFSO_CheckedChanged;
+            disabledFSO.Checked = UserConfigs.DisableFSO;
+            disabledFSO.CheckedChanged += disabledFSO_CheckedChanged;
+            try
+            {
+                Optimizer.ApplyFSOState(UserConfigs.DisableFSO, UserConfigs.GamePath);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogError(ex); // Fails silently so it doesn't interrupt boot
+            }
 
             autoFlushSound.Checked = UserConfigs.AutoFlushSfx;
             if (autoFlushChk.Checked && !Optimizer.IsAdministrator())
@@ -546,6 +559,18 @@ namespace RustOptimizer
             Optimizer.SetCpuAffinity(pCoresToggle.Checked);
             Optimizer.InitializeAutoFlushTimer();
             Optimizer.SetPriority(highPriority.Checked);
+            try
+            {
+                Optimizer.ApplyFSOState(disabledFSO.Checked, UserConfigs.GamePath);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("Could not apply Fullscreen Fix. Try running Rust Optimizer as Administrator.", "Registry Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogError(ex);
+            }
             MessageBox.Show("Settings Saved!", "Rust Optimizer", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -695,6 +720,63 @@ namespace RustOptimizer
                 FileName = site,
                 UseShellExecute = true
             });
+        }
+
+        private void disabledFSO_CheckedChanged(object sender, EventArgs e)
+        {
+            var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
+            ini.WriteValue("AppSettings", "DisableFSO", disabledFSO.Checked.ToString(), ini.Path);
+            UserConfigs.Refresh();
+        }
+
+        private void clearSkinCacheBtn_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(UserConfigs.GamePath) || !Directory.Exists(UserConfigs.GamePath))
+            {
+                MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                DirectoryInfo rustDir = new DirectoryInfo(UserConfigs.GamePath);
+                string steamAppsDir = rustDir.Parent.Parent.FullName;
+                string workshopPath = Path.Combine(steamAppsDir, "workshop", "content", "252490");
+
+                if (!Directory.Exists(workshopPath))
+                {
+                    MessageBox.Show("Skin cache is already empty or path is non-standard.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                long freedBytes = 0;
+                int deletedFiles = 0;
+                DirectoryInfo di = new DirectoryInfo(workshopPath);
+
+                foreach (FileInfo file in di.EnumerateFiles("*", SearchOption.AllDirectories))
+                {
+                    freedBytes += file.Length;
+                    file.Delete();
+                    deletedFiles++;
+                }
+
+                foreach (DirectoryInfo dir in di.EnumerateDirectories("*", SearchOption.TopDirectoryOnly))
+                {
+                    dir.Delete(true);
+                }
+
+                double freedMB = freedBytes / 1024.0 / 1024.0;
+                MessageBox.Show($"Successfully cleared {deletedFiles} cached skins.\nFreed {freedMB:F2} MB of disk space!", "Cache Nuked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (IOException)
+            {
+                MessageBox.Show("Could not clear skin cache. Make sure Rust is fully closed so the files aren't in use.", "File in Use", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogError(ex);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

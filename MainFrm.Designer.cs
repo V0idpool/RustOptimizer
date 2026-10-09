@@ -75,6 +75,10 @@ namespace RustOptimizer
             ROGroupBox5 = new ROGroupBox();
             ROTabControl1 = new ROTabControl();
             tabPage2 = new TabPage();
+            roLabel11 = new ROLabel();
+            disabledFSO = new ResponsiveToggle();
+            roLabel4 = new ROLabel();
+            clearSkinCacheBtn = new ROButton();
             roLabel3 = new ROLabel();
             pCoresToggle = new ResponsiveToggle();
             ROLabel10 = new ROLabel();
@@ -572,6 +576,10 @@ namespace RustOptimizer
             // tabPage2
             // 
             tabPage2.BackColor = Color.FromArgb(40, 40, 40);
+            tabPage2.Controls.Add(roLabel11);
+            tabPage2.Controls.Add(disabledFSO);
+            tabPage2.Controls.Add(roLabel4);
+            tabPage2.Controls.Add(clearSkinCacheBtn);
             tabPage2.Controls.Add(roLabel3);
             tabPage2.Controls.Add(pCoresToggle);
             tabPage2.Controls.Add(ROLabel10);
@@ -582,6 +590,50 @@ namespace RustOptimizer
             tabPage2.Size = new Size(481, 101);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "General Tools";
+            // 
+            // roLabel11
+            // 
+            roLabel11.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            roLabel11.Location = new Point(240, 7);
+            roLabel11.Name = "roLabel11";
+            roLabel11.Size = new Size(178, 23);
+            roLabel11.TabIndex = 20;
+            roLabel11.Text = "roLabel11";
+            roLabel11.Value1 = " ";
+            roLabel11.Value2 = "Disable FS Optimizations:";
+            // 
+            // disabledFSO
+            // 
+            disabledFSO.Checked = false;
+            disabledFSO.Font = new Font("Segoe UI", 10F);
+            disabledFSO.Location = new Point(420, 8);
+            disabledFSO.Name = "disabledFSO";
+            disabledFSO.Size = new Size(45, 20);
+            disabledFSO.TabIndex = 19;
+            disabledFSO.Text = "Enable/Disable";
+            disabledFSO.CheckedChanged += disabledFSO_CheckedChanged;
+            // 
+            // roLabel4
+            // 
+            roLabel4.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            roLabel4.Location = new Point(6, 65);
+            roLabel4.Name = "roLabel4";
+            roLabel4.Size = new Size(119, 23);
+            roLabel4.TabIndex = 18;
+            roLabel4.Text = "roLabel4";
+            roLabel4.Value1 = " ";
+            roLabel4.Value2 = "Clear Skin Cache:";
+            // 
+            // clearSkinCacheBtn
+            // 
+            clearSkinCacheBtn.BackColor = Color.Transparent;
+            clearSkinCacheBtn.Font = new Font("Segoe UI", 9.5F);
+            clearSkinCacheBtn.Location = new Point(135, 65);
+            clearSkinCacheBtn.Name = "clearSkinCacheBtn";
+            clearSkinCacheBtn.Size = new Size(75, 22);
+            clearSkinCacheBtn.TabIndex = 17;
+            clearSkinCacheBtn.Text = "Clear...";
+            clearSkinCacheBtn.Click += clearSkinCacheBtn_Click;
             // 
             // roLabel3
             // 
@@ -862,5 +914,9 @@ namespace RustOptimizer
         private GUI.ResponsiveStatPill lblCPUInfo;
         private ROLabel roLabel3;
         public ResponsiveToggle pCoresToggle;
+        private ROLabel roLabel4;
+        private ROButton clearSkinCacheBtn;
+        private ROLabel roLabel11;
+        public ResponsiveToggle disabledFSO;
     }
 }

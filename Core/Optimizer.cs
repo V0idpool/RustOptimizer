@@ -1,4 +1,5 @@
-﻿using RustOptimizer.Helpers;
+﻿using Microsoft.Win32;
+using RustOptimizer.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -504,6 +505,32 @@ namespace RustOptimizer.Core
             if ((long)p.ProcessorAffinity != targetMask)
             {
                 p.ProcessorAffinity = (IntPtr)targetMask;
+            }
+        }
+
+        /// <summary>
+        /// Actively enforces the Disable Fullscreen Optimizations state in the Windows Registry.
+        /// </summary>
+        public static void ApplyFSOState(bool disableFSO, string gamePath)
+        {
+            if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)) return;
+
+            string rustClientExe = Path.Combine(gamePath, "RustClient.exe");
+            string keyPath = @"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers";
+
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(keyPath, true) ?? Registry.CurrentUser.CreateSubKey(keyPath))
+            {
+                if (key != null)
+                {
+                    if (disableFSO)
+                    {
+                        key.SetValue(rustClientExe, "~ DISABLEDXMAXIMIZEDWINDOWEDMODE");
+                    }
+                    else
+                    {
+                        key.DeleteValue(rustClientExe, false);
+                    }
+                }
             }
         }
     }
