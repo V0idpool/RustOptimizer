@@ -14,24 +14,30 @@ namespace RustOptimizer
         private RustConfig rustConfig = new RustConfig();
         public System.Windows.Forms.Timer autoFlushTimer;
         public NotifyIcon sysTrayIcon;
+        private CancellationTokenSource _pingCts;
 
         public MainFrm()
         {
             InitializeComponent();
             Instance = this;
             // Fixes the buggy colors of the menustrip :(
-            menuStrip1.Renderer = new ToolStripProfessionalRenderer(new GUI.ColorTable());
-            menuStrip1.ForeColor = Color.White;
-            menuStrip1.BackColor = Color.FromArgb(40, 40, 40);
+            menuStrip1.Renderer = new GUI.ROMenuRenderer();
+            menuStrip1.ForeColor = GUI.ROPalette.TextPrimary;
+            menuStrip1.BackColor = GUI.ROPalette.SurfaceCard;
+            cardProfCompetitive.Click += (s, e) => profileDropdown.SelectedIndex = 0;
+            cardProfBalanced.Click += (s, e) => profileDropdown.SelectedIndex = 1;
+            cardProfRecommended.Click += (s, e) => profileDropdown.SelectedIndex = 2;
+            cardProfUltra.Click += (s, e) => profileDropdown.SelectedIndex = 3;
+            profileDropdown.SelectedIndexChanged += (s, e) => SyncProfileCards();
         }
 
         private async void MainFrm_Load(object sender, EventArgs e)
         {
-            _ = Updates.CheckForUpdates();
             System.Version currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             string versionString = currentVersion.Major.ToString() + "." + currentVersion.Minor.ToString();
-            MainFrm.Instance.Text = $"Rust Optimizer v{versionString}";
-            UserConfigs.Refresh();
+            Text = $"Rust Optimizer v{versionString}";
+            roThemeContainer1.SubHeader = $"v{versionString}";
+
             string directory = Path.GetDirectoryName(UserConfigs.ConfigPath);
 
             if (!Directory.Exists(directory))
@@ -43,7 +49,11 @@ namespace RustOptimizer
             {
                 Helpers.EmbedResources.SaveToDisk("UserCFG.ini", UserConfigs.ConfigPath);
             }
-
+            UserConfigs.Refresh();
+            if (UserConfigs.CheckForUpdates)
+            {
+                _ = Updates.CheckForUpdates();
+            }
             string gamePath = UserConfigs.GamePath;
             if (!string.IsNullOrEmpty(gamePath))
             {
@@ -93,7 +103,7 @@ namespace RustOptimizer
             }
             catch (Exception ex)
             {
-                ExceptionHandler.LogError(ex); // Fails silently so it doesn't interrupt boot
+                ExceptionHandler.LogError(ex);
             }
 
             autoFlushSound.Checked = UserConfigs.AutoFlushSfx;
@@ -140,8 +150,39 @@ namespace RustOptimizer
             lblGPUInfo.Text = $"{HardwareDetector.GetGpuName()} ({HardwareDetector.GetGpuVramInGB():F0}GB VRAM)";
             lblRAMInfo.Text = $"{HardwareDetector.GetRamInfo()} ({HardwareDetector.GetTotalMemoryInGB():F0} GB)";
             LoadBackups();
+            updateToggle.Checked = UserConfigs.CheckForUpdates;
+            screenModeDropdown.SelectedIndex = UserConfigs.ScreenMode == 0 ? 1 : 0;
+            SelectDropdownByNumericValue(fpsLimitDropdown, UserConfigs.FpsLimit, 0);
+            SelectDropdownByNumericValue(menuFpsLimitDropdown, UserConfigs.FpsLimitInMenu, 2);
+            smartFlushToggle.Checked = UserConfigs.SmartFlushEnabled;
+            smartFlushThreshold.Value = Math.Clamp(UserConfigs.SmartFlushThresholdGB, 1, 16);
+            autoPowerPlanToggle.Checked = UserConfigs.AutoPowerPlan;
+            highPerfGpuToggle.Checked = UserConfigs.HighPerfGpuBinding;
+            gameModeDvrToggle.Checked = UserConfigs.GameModeAndDisableDvr;
+            throttleAppsToggle.Checked = UserConfigs.ThrottleBackgroundApps;
+            Optimizer.SetAutoPowerPlan(UserConfigs.AutoPowerPlan);
+            Optimizer.SetBackgroundAppThrottling(UserConfigs.ThrottleBackgroundApps);
 
-            ContextMenuStrip trayMenu = new ContextMenuStrip();
+            try
+            {
+                if (UserConfigs.HighPerfGpuBinding)
+                    Optimizer.ApplyGpuPreference(true, UserConfigs.GamePath);
+                if (UserConfigs.GameModeAndDisableDvr)
+                    Optimizer.ApplyGameModeAndDvr(true);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogError(ex);
+            }
+
+            // Network & Ping UI
+            disableNicPowerToggle.Checked = UserConfigs.DisableNicPowerSaving;
+            qosDscpToggle.Checked = UserConfigs.QosDscpEnabled;
+            txtServerIp.Text = UserConfigs.LastPingServer;
+            ContextMenuStrip trayMenu = new ContextMenuStrip
+            {
+                Renderer = new GUI.ROMenuRenderer()
+            };
             trayMenu.Items.Add("Launch Rust...", null, (s, args) => TrayHandler.LaunchRust());
             trayMenu.Items.Add("Open", null, (s, args) => TrayHandler.ShowFormFromTray());
             trayMenu.Items.Add("Exit", null, (s, args) =>
@@ -157,9 +198,16 @@ namespace RustOptimizer
                 ContextMenuStrip = trayMenu,
                 Visible = false
             };
-
+            navDashboard.Selected = true;
             sysTrayIcon.DoubleClick += (s, args) => TrayHandler.ShowFormFromTray();
         }
+
+        private void MainFrm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _pingCts?.Cancel();
+            Optimizer.RestoreAllRuntimeStates();
+        }
+
         /// <summary>
         /// Grabs all the backup folders and adds them to the dropdown menu.
         /// </summary>
@@ -199,7 +247,7 @@ namespace RustOptimizer
                 return "Balanced (Good Performance & Looks)";
             }
 
-            return "Competitive (Maximum FPS)";
+            return "Competitive (Max FPS)";
         }
         /// <summary>
         /// This button lets the user select their game's path using a folder dialog.
@@ -228,6 +276,29 @@ namespace RustOptimizer
         {
             this.Close();
         }
+
+        private void SyncProfileCards()
+        {
+            cardProfCompetitive.Selected = profileDropdown.SelectedIndex == 0;
+            cardProfBalanced.Selected = profileDropdown.SelectedIndex == 1;
+            cardProfRecommended.Selected = profileDropdown.SelectedIndex == 2;
+            cardProfUltra.Selected = profileDropdown.SelectedIndex == 3;
+        }
+
+        private static void SelectDropdownByNumericValue(ComboBox combo, int value, int fallbackIndex)
+        {
+            string target = value == 0 ? "Unlimited (0)" : value.ToString(CultureInfo.InvariantCulture);
+            int idx = combo.Items.IndexOf(target);
+            combo.SelectedIndex = idx >= 0 ? idx : Math.Min(fallbackIndex, combo.Items.Count - 1);
+        }
+
+        private static int ParseDropdownNumericValue(ComboBox combo, int fallback)
+        {
+            string text = combo.SelectedItem?.ToString() ?? string.Empty;
+            if (text.StartsWith("Unlimited", StringComparison.OrdinalIgnoreCase)) return 0;
+            return int.TryParse(text, out int parsed) ? parsed : fallback;
+        }
+
         /// <summary>
         /// The main button that applies the optimization profile to the game's client.cfg file.
         /// It first loads the current settings, updates them with the new profile, and saves the file.
@@ -241,6 +312,7 @@ namespace RustOptimizer
                 MessageBox.Show("Please select a valid game path first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
             string profile = profileDropdown.SelectedItem?.ToString();
             if (string.IsNullOrEmpty(profile))
             {
@@ -248,10 +320,19 @@ namespace RustOptimizer
                 return;
             }
 
+            int screenMode = screenModeDropdown.SelectedIndex == 1 ? 0 : 1;
+            int fpsLimit = ParseDropdownNumericValue(fpsLimitDropdown, 0);
+            int menuFpsLimit = ParseDropdownNumericValue(menuFpsLimitDropdown, 60);
+
+            var ini = new inisettings { Path = UserConfigs.ConfigPath };
+            ini.WriteValue("AppSettings", "Profile", profile, ini.Path);
+            ini.WriteValue("AppSettings", "ScreenMode", screenMode.ToString(CultureInfo.InvariantCulture), ini.Path);
+            ini.WriteValue("AppSettings", "FpsLimit", fpsLimit.ToString(CultureInfo.InvariantCulture), ini.Path);
+            ini.WriteValue("AppSettings", "FpsLimitInMenu", menuFpsLimit.ToString(CultureInfo.InvariantCulture), ini.Path);
+            UserConfigs.Refresh();
+
             rustConfig.LoadSettings(UserConfigs.GameConfigPath);
-
             var optimalSettings = Optimizer.GetOptimalSettings(profile);
-
             foreach (var setting in optimalSettings)
             {
                 rustConfig.SetSetting(setting.Key, setting.Value);
@@ -260,6 +341,7 @@ namespace RustOptimizer
             rustConfig.SaveSettings(UserConfigs.GameConfigPath);
             MessageBox.Show($"'{profile}' profile applied successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+ 
         /// <summary>
         /// Creates a backup of the current client.cfg file, named with a timestamp, and adds it to the list.
         /// </summary>
@@ -450,6 +532,7 @@ namespace RustOptimizer
                 });
             }
         }
+
         /// <summary>
         /// Analyzes the user's hardware (CPU, GPU, and RAM) and recommends the most suitable optimization profile from the dropdown menu for the best performance.
         /// </summary>
@@ -459,13 +542,7 @@ namespace RustOptimizer
             profileDropdown.SelectedItem = recommendedProfile;
             MessageBox.Show($"Based on your hardware, we recommend the '{recommendedProfile}' profile for the best experience.", "Profile Recommendation", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            using (About aboutForm = new About())
-            {
-                aboutForm.ShowDialog(this);
-            }
-        }
+
         /// <summary>
         /// Save your current game settings to a file that can be shared. The file gets saved as a .rop file, making it easy to send to your friends.
         /// </summary>
@@ -547,51 +624,51 @@ namespace RustOptimizer
             var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
             UserConfigs.SetGamePath(gamePathString.Text);
             gamePathString.Text = UserConfigs.GamePath;
+
             ini.WriteValue("AppSettings", "GamePath", gamePathString.Text, ini.Path);
             ini.WriteValue("AppSettings", "Profile", profileDropdown.Text, ini.Path);
             ini.WriteValue("AppSettings", "AutoFlush", autoFlushChk.Checked.ToString(), ini.Path);
+            ini.WriteValue("AppSettings", "SmartFlush", smartFlushToggle.Checked.ToString(), ini.Path);
+            ini.WriteValue("AppSettings", "SmartFlushThresholdGB", smartFlushThreshold.Value.ToString(CultureInfo.InvariantCulture), ini.Path);
             ini.WriteValue("AppSettings", "FlushInterval", autoFlushinterval.Value.ToString(CultureInfo.InvariantCulture), ini.Path);
             ini.WriteValue("AppSettings", "FlushUnit", autoFlushMinHour.Text, ini.Path);
             ini.WriteValue("AppSettings", "FlushSound", autoFlushSound.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
-            ini.WriteValue("AppSettings", "CPUHighPriority", highPriority.Checked.ToString(CultureInfo.InvariantCulture), ini.Path);
+            ini.WriteValue("AppSettings", "CPUHighPriority", highPriority.Checked.ToString(), ini.Path);
             ini.WriteValue("AppSettings", "PhysicalCoresOnly", pCoresToggle.Checked.ToString(), ini.Path);
+            ini.WriteValue("AppSettings", "DisableFSO", disabledFSO.Checked.ToString(), ini.Path);
+            ini.WriteValue("AppSettings", "AutoPowerPlan", autoPowerPlanToggle.Checked.ToString(), ini.Path);
+            ini.WriteValue("AppSettings", "HighPerfGpuBinding", highPerfGpuToggle.Checked.ToString(), ini.Path);
+            ini.WriteValue("AppSettings", "GameModeAndDisableDvr", gameModeDvrToggle.Checked.ToString(), ini.Path);
+            ini.WriteValue("AppSettings", "ThrottleBackgroundApps", throttleAppsToggle.Checked.ToString(), ini.Path);
             UserConfigs.Refresh();
             Optimizer.SetCpuAffinity(pCoresToggle.Checked);
-            Optimizer.InitializeAutoFlushTimer();
             Optimizer.SetPriority(highPriority.Checked);
+            Optimizer.SetAutoPowerPlan(autoPowerPlanToggle.Checked);
+            Optimizer.SetBackgroundAppThrottling(throttleAppsToggle.Checked);
+            Optimizer.InitializeAutoFlushTimer();
+
             try
             {
                 Optimizer.ApplyFSOState(disabledFSO.Checked, UserConfigs.GamePath);
+                Optimizer.ApplyGpuPreference(highPerfGpuToggle.Checked, UserConfigs.GamePath);
+                Optimizer.ApplyGameModeAndDvr(gameModeDvrToggle.Checked);
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Could not apply Fullscreen Fix. Try running Rust Optimizer as Administrator.", "Registry Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Some tweaks require Administrator privileges. Try running Rust Optimizer as Administrator.", "Registry Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
                 ExceptionHandler.LogError(ex);
             }
+
             MessageBox.Show("Settings Saved!", "Rust Optimizer", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            string site = "https://buymeacoffee.com/rustforgedev";
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = site,
-                UseShellExecute = true
-            });
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string site = "https://voidtech.xyz/";
+            string site = "https://voidtechstudios.us/";
             Process.Start(new ProcessStartInfo
             {
                 FileName = site,
@@ -618,16 +695,6 @@ namespace RustOptimizer
             var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
             ini.WriteValue("AppSettings", "FlushInterval", autoFlushinterval.Value.ToString(CultureInfo.InvariantCulture), ini.Path);
             UserConfigs.Refresh();
-        }
-
-        private void donateToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            string site = "https://buymeacoffee.com/rustforgedev";
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = site,
-                UseShellExecute = true
-            });
         }
 
         private void minimizeToTrayToolStripMenuItem_Click(object sender, EventArgs e)
@@ -714,7 +781,7 @@ namespace RustOptimizer
 
         private void linkLabel3_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string site = "https://rustoptimizer.voidtech.xyz/";
+            string site = "https://rustoptimizer.us/";
             Process.Start(new ProcessStartInfo
             {
                 FileName = site,
@@ -778,6 +845,144 @@ namespace RustOptimizer
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void clearShaderCacheBtn_Click(object sender, EventArgs e)
+        {
+            DialogResult confirm = MessageBox.Show(
+                "This clears DirectX, NVIDIA, and AMD GPU shader caches.\n\n" +
+                "Note: Your first 5 minutes or so in-game after clearing will rebuild fresh shaders (brief initial loading stutter, smoother gameplay afterward).\n\nProceed?",
+                "Clear Shader Cache", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes) return;
+
+            var (deletedFiles, freedMB, skippedFiles) = Optimizer.ClearShaderCaches();
+            MessageBox.Show(
+                $"Shader cache cleanup complete!\n\n" +
+                $"• Files deleted: {deletedFiles}\n" +
+                $"• Space freed: {freedMB:F2} MB\n" +
+                $"• Active/locked files skipped: {skippedFiles}",
+                "Shader Cache Cleared", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btnApplyNetworkTweaks_Click(object sender, EventArgs e)
+        {
+            if (!Optimizer.IsAdministrator())
+            {
+                DialogResult res = MessageBox.Show(
+                    "Modifying NIC power settings and Windows QoS DSCP policies requires Administrator privileges.\n\nRestart as Administrator now?",
+                    "Administrator Required", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+                if (res == DialogResult.OK)
+                    Optimizer.RestartAsAdministrator();
+                return;
+            }
+
+            try
+            {
+                int adaptersUpdated = Optimizer.ApplyNicPowerTweaks(disableNicPowerToggle.Checked);
+                Optimizer.ApplyQosDscpPolicy(qosDscpToggle.Checked);
+
+                var ini = new inisettings { Path = UserConfigs.ConfigPath };
+                ini.WriteValue("AppSettings", "DisableNicPowerSaving", disableNicPowerToggle.Checked.ToString(), ini.Path);
+                ini.WriteValue("AppSettings", "QosDscpEnabled", qosDscpToggle.Checked.ToString(), ini.Path);
+                UserConfigs.Refresh();
+
+                MessageBox.Show(
+                    $"Network tweaks applied!\n\n" +
+                    $"• Active Ethernet NICs updated: {adaptersUpdated} (NIC Power Saving / EEE {(disableNicPowerToggle.Checked ? "Disabled" : "Restored")})\n" +
+                    $"• QoS DSCP Policy (RustClient.exe UDP): {(qosDscpToggle.Checked ? "Enabled" : "Removed")}\n\n" +
+                    "Tip: Reboot or disconnect/reconnect your Ethernet adapter to make sure the driver reloads power settings.",
+                    "Network Tweaks Applied", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.LogError(ex);
+                MessageBox.Show($"Failed to apply network tweaks: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnFlushDns_Click(object sender, EventArgs e)
+        {
+            bool ok = Optimizer.FlushDnsCache(out string output);
+            MessageBox.Show(string.IsNullOrWhiteSpace(output) ? (ok ? "DNS resolver cache flushed." : "DNS flush failed.") : output,
+                "Flush DNS", MessageBoxButtons.OK, ok ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+        }
+
+        private async void btnRunPingTest_Click(object sender, EventArgs e)
+        {
+            if (_pingCts != null)
+            {
+                _pingCts.Cancel();
+                return;
+            }
+
+            string target = txtServerIp.Text.Trim();
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                MessageBox.Show("Please enter a server IP address or hostname first.", "Ping Monitor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var ini = new inisettings { Path = UserConfigs.ConfigPath };
+            ini.WriteValue("AppSettings", "LastPingServer", target, ini.Path);
+            UserConfigs.LastPingServer = target;
+
+            int count = (int)pingCountNumeric.Value;
+            _pingCts = new CancellationTokenSource();
+            btnRunPingTest.Text = "Stop";
+            lblPingAvg.Text = $"Testing {target} (0/{count})...";
+            lblPingJitter.Text = "Measuring...";
+            lblPacketLoss.Text = "Measuring...";
+
+            var progress = new Progress<PingTestProgress>(p =>
+            {
+                lblPingAvg.Text = p.Sent > p.Lost
+                    ? $"{p.AvgPingMs:F1} ms  (Min: {p.MinPingMs:F0} | Max: {p.MaxPingMs:F0} ms)  [{p.ProbeMode}]  {p.Completed}/{p.Total}"
+                    : $"No reply yet [{p.ProbeMode}]  {p.Completed}/{p.Total}";
+
+                lblPingJitter.Text = p.Sent - p.Lost >= 2
+                    ? $"{p.JitterMs:F1} ms  ({(p.JitterMs < 5 ? "Rock Solid" : p.JitterMs < 15 ? "Good" : "Spiky / Unstable")})"
+                    : "Calculating...";
+
+                lblPacketLoss.Text = $"{p.PacketLossPercent:F1}%  ({p.Lost} lost of {p.Sent} sent)";
+                lblPacketLoss.DotColor = p.PacketLossPercent == 0 ? GUI.ROPalette.HudGreen : GUI.ROPalette.AccentCrimson;
+            });
+
+            try
+            {
+                await Optimizer.RunPingTestAsync(target, count, progress, _pingCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                lblPingAvg.Text += "  (Stopped)";
+            }
+            catch (Exception ex)
+            {
+                lblPingAvg.Text = $"Error: {ex.Message}";
+            }
+            finally
+            {
+                _pingCts.Dispose();
+                _pingCts = null;
+                btnRunPingTest.Text = "Run Test";
+            }
+        }
+
+        private void _lnkWebsite_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://voidtechstudios.us/") { UseShellExecute = true });
+        }
+
+        private void updateToggle_CheckedChanged(object sender, EventArgs e)
+        {
+            var ini = new RustOptimizer.Helpers.inisettings { Path = UserConfigs.ConfigPath };
+            ini.WriteValue("AppSettings", "CheckForUpdates", updateToggle.Checked.ToString(), ini.Path);
+            UserConfigs.CheckForUpdates = updateToggle.Checked;
+
+            if (updateToggle.Checked)
+            {
+                _ = Updates.CheckForUpdates();
+            }
+        }
     }
 }
-

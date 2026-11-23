@@ -64,21 +64,18 @@ namespace RustOptimizer.Helpers
                 string manufacturer = obj["Manufacturer"]?.ToString().Trim() ?? "Unknown";
                 string partNumber = obj["PartNumber"]?.ToString().Trim() ?? "";
 
-                // First, try to infer the RAM type directly from the part number
                 string ramTypeFromPartNumber = GetRamTypeFromPartNumber(partNumber);
                 if (!string.IsNullOrEmpty(ramTypeFromPartNumber))
                 {
                     return $"{manufacturer} {ramTypeFromPartNumber} {partNumber}";
                 }
 
-                // If part number parsing fails, fall back to SMBIOSMemoryType
                 if (obj["SMBIOSMemoryType"] != null && Convert.ToInt32(obj["SMBIOSMemoryType"]) != 0)
                 {
                     int smbiosMemoryType = Convert.ToInt32(obj["SMBIOSMemoryType"]);
                     return $"{manufacturer} {GetSMBIOSRamTypeString(smbiosMemoryType)} {partNumber}";
                 }
 
-                // If SMBIOSMemoryType is unavailable, fall back to MemoryType
                 if (obj["MemoryType"] != null)
                 {
                     int memoryType = Convert.ToInt32(obj["MemoryType"]);
@@ -189,7 +186,6 @@ namespace RustOptimizer.Helpers
                                         string desc = descObj.ToString();
                                         string lowerDesc = desc.ToLower();
 
-                                        // Skip known virtual/software adapters
                                         if (lowerDesc.Contains("virtual") || lowerDesc.Contains("remote") ||
                                             lowerDesc.Contains("microsoft basic") || lowerDesc.Contains("citrix") ||
                                             lowerDesc.Contains("mirage") || lowerDesc.Contains("spacedesk"))
@@ -222,7 +218,6 @@ namespace RustOptimizer.Helpers
                 Console.WriteLine($"Error getting GPU Name from registry: {ex.Message}");
             }
 
-            // Direct fallback to WMI if the registry doesn't return anything valid
             if (bestGpuName == "N/A")
             {
                 try
@@ -311,7 +306,6 @@ namespace RustOptimizer.Helpers
         {
             if (memObj == null) return 0;
 
-            // Nvidia often stores memory size as REG_BINARY (byte array)
             if (memObj is byte[] bytes)
             {
                 if (bytes.Length == 8)
@@ -326,7 +320,6 @@ namespace RustOptimizer.Helpers
             {
                 long vramBytes = Convert.ToInt64(memObj);
 
-                // Fix for 32-bit unsigned integers being incorrectly cast as negative signed longs
                 if (vramBytes < 0)
                 {
                     vramBytes = (long)(uint)Convert.ToInt32(memObj);

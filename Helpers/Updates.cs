@@ -1,57 +1,116 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace RustOptimizer.Helpers
 {
     public class Updates
     {
-        private const string VersionUrl = "https://rustoptimizer.voidtech.xyz/download/official/version.txt";
-        private const string DownloadUrl = "https://rustoptimizer.voidtech.xyz/downloads";
+        public static readonly Version? currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+
+        private const string VersionUrl = "https://rustoptimizer.us/download/official/version.txt";
+        private const string DownloadUrl = "https://rustoptimizer.us/downloads";
+
+        private static readonly HttpClient SharedHttpClient = new()
+        {
+            Timeout = TimeSpan.FromSeconds(5)
+        };
+
+        private static readonly TimeSpan CheckCooldown = TimeSpan.FromSeconds(60);
+        private static long _lastCheckTicks = 0;
+        private static int _isChecking = 0;
 
         public static async Task CheckForUpdates()
         {
+            if (Interlocked.CompareExchange(ref _isChecking, 1, 0) != 0)
+                return;
+
             try
             {
-                Version currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                long nowTicks = DateTime.UtcNow.Ticks;
+                long lastTicks = Interlocked.Read(ref _lastCheckTicks);
 
-                using (HttpClient client = new HttpClient())
+                if (lastTicks > 0 && (nowTicks - lastTicks) < CheckCooldown.Ticks)
                 {
-                    client.Timeout = TimeSpan.FromSeconds(10);
-                    client.DefaultRequestHeaders.Add("User-Agent", "RustOptimizer-UpdateClient");
-                    string fetchedVersionStr = await client.GetStringAsync(VersionUrl);
-                    fetchedVersionStr = new string(fetchedVersionStr.Where(c => char.IsDigit(c) || c == '.').ToArray());
+                    double remainingSeconds = Math.Ceiling((CheckCooldown.Ticks - (nowTicks - lastTicks)) / (double)TimeSpan.TicksPerSecond);
+                    ExceptionHandler.LogMessage($"[UPDATE] Throttled update check ({remainingSeconds}s cooldown remaining).");
+                    return;
+                }
 
-                    if (Version.TryParse(fetchedVersionStr, out Version onlineVersion))
+                Interlocked.Exchange(ref _lastCheckTicks, nowTicks);
+
+                using HttpResponseMessage response = await SharedHttpClient.GetAsync(VersionUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string rawContent = (await response.Content.ReadAsStringAsync()).Trim();
+                    if (string.IsNullOrWhiteSpace(rawContent))
+                        return;
+
+                    string[] lines = rawContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    string latestVersionTxt = lines[0].Trim().TrimStart('v', 'V');
+                    string releaseNotes = lines.Length > 1
+                        ? string.Join(Environment.NewLine + Environment.NewLine, lines[1..]).Trim()
+                        : string.Empty;
+
+                    if (currentVersion is not null && Version.TryParse(latestVersionTxt, out Version? onlineVersion))
                     {
                         if (onlineVersion > currentVersion)
                         {
-                            DialogResult result = MessageBox.Show(
-                                $"A new update for Rust Optimizer is available!\n\nCurrent Version: {currentVersion}\nLatest Version: {onlineVersion}\n\nWould you like to open the website to download the latest version?",
-                                "Update Available",
-                                MessageBoxButtons.OKCancel,
-                                MessageBoxIcon.Information
-                            );
-
-                            if (result == DialogResult.OK)
-                            {
-                                Process.Start(new ProcessStartInfo
-                                {
-                                    FileName = DownloadUrl,
-                                    UseShellExecute = true
-                                });
-                            }
+                            ExceptionHandler.LogMessage($"[UPDATE] New version v{onlineVersion} is available. (Installed: v{currentVersion}).");
+                            ShowUpdateAvailableDialog(currentVersion.ToString(), onlineVersion.ToString(), releaseNotes);
                         }
                     }
                 }
+                else
+                {
+                    ExceptionHandler.LogMessage($"Update Check: Server returned {response.StatusCode}. Continuing offline.");
+                }
+            }
+            catch (HttpRequestException)
+            {
+                ExceptionHandler.LogMessage("Update Check: No internet connection detected. Continuing offline.");
+            }
+            catch (TaskCanceledException)
+            {
+                ExceptionHandler.LogMessage("Update Check: Server timed out. Continuing offline.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Update check failed: {ex.Message}");
                 ExceptionHandler.LogError(ex);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _isChecking, 0);
+            }
+        }
+
+        private static void ShowUpdateAvailableDialog(string currentVer, string latestVer, string releaseNotes)
+        {
+            void OpenDialog()
+            {
+                using var dlg = new UpdateDlg(currentVer, latestVer, releaseNotes);
+                DialogResult result = MainFrm.Instance is not null
+                    ? dlg.ShowDialog(MainFrm.Instance)
+                    : dlg.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    Process.Start(new ProcessStartInfo(DownloadUrl) { UseShellExecute = true });
+                }
+            }
+
+            if (MainFrm.Instance is not null && MainFrm.Instance.InvokeRequired)
+            {
+                MainFrm.Instance.BeginInvoke((Action)OpenDialog);
+            }
+            else
+            {
+                OpenDialog();
             }
         }
     }

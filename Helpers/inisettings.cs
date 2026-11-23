@@ -40,7 +40,6 @@ namespace RustOptimizer.Helpers
             {
                 return DefaultValue;
             }
-            // If the file doesn't exist on first launch, silently return the DefaultValue.
             if (!File.Exists(Path))
             {
                 return DefaultValue;
