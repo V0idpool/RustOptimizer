@@ -54,7 +54,20 @@ namespace RustOptimizer
             {
                 _ = Updates.CheckForUpdates();
             }
+
             string gamePath = UserConfigs.GamePath;
+            if (!UserConfigs.IsValidRustDirectory(gamePath))
+            {
+                string? detectedPath = UserConfigs.TryAutoDetectRustPath();
+                if (!string.IsNullOrEmpty(detectedPath))
+                {
+                    UserConfigs.SetGamePath(detectedPath);
+                    var ini = new inisettings { Path = UserConfigs.ConfigPath };
+                    ini.WriteValue("AppSettings", "GamePath", UserConfigs.GamePath, ini.Path);
+                    gamePath = UserConfigs.GamePath;
+                }
+            }
+
             if (!string.IsNullOrEmpty(gamePath))
             {
                 gamePathString.Text = gamePath;

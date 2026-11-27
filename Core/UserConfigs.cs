@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace RustOptimizer.Core
@@ -97,6 +99,118 @@ namespace RustOptimizer.Core
             }
 
             return normalizedPath;
+        }
+
+        public static bool IsValidRustDirectory(string? path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+                return false;
+
+            return File.Exists(Path.Combine(path, "RustClient.exe"))
+                || File.Exists(Path.Combine(path, "Rust.exe"));
+        }
+
+        public static string? TryAutoDetectRustPath()
+        {
+            try
+            {
+                string? steamPath = GetSteamInstallPath();
+                if (!string.IsNullOrWhiteSpace(steamPath) && Directory.Exists(steamPath))
+                {
+                    var libraryRoots = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { steamPath };
+
+                    string[] vdfCandidates =
+                    {
+                        Path.Combine(steamPath, "config", "libraryfolders.vdf"),
+                        Path.Combine(steamPath, "steamapps", "libraryfolders.vdf")
+                    };
+
+                    foreach (string vdfPath in vdfCandidates)
+                    {
+                        if (!File.Exists(vdfPath)) continue;
+
+                        string content = File.ReadAllText(vdfPath);
+                        foreach (Match match in Regex.Matches(content, "\"path\"\\s+\"([^\"]+)\"", RegexOptions.IgnoreCase))
+                        {
+                            string libPath = match.Groups[1].Value.Replace(@"\\", @"\").Trim();
+                            if (Directory.Exists(libPath))
+                                libraryRoots.Add(libPath);
+                        }
+                    }
+
+                    foreach (string libRoot in libraryRoots)
+                    {
+                        string steamApps = Path.Combine(libRoot, "steamapps");
+                        if (!Directory.Exists(steamApps)) continue;
+
+                        string acfPath = Path.Combine(steamApps, "appmanifest_252490.acf");
+                        if (File.Exists(acfPath))
+                        {
+                            string acf = File.ReadAllText(acfPath);
+                            Match m = Regex.Match(acf, "\"installdir\"\\s+\"([^\"]+)\"", RegexOptions.IgnoreCase);
+                            if (m.Success)
+                            {
+                                string candidate = Path.Combine(steamApps, "common", m.Groups[1].Value.Trim());
+                                if (IsValidRustDirectory(candidate))
+                                    return candidate;
+                            }
+                        }
+
+                        string directCandidate = Path.Combine(steamApps, "common", "Rust");
+                        if (IsValidRustDirectory(directCandidate))
+                            return directCandidate;
+                    }
+                }
+
+                string[] commonSubPaths =
+                {
+                    Path.Combine("Program Files (x86)", "Steam", "steamapps", "common", "Rust"),
+                    Path.Combine("Steam", "steamapps", "common", "Rust"),
+                    Path.Combine("SteamLibrary", "steamapps", "common", "Rust"),
+                    Path.Combine("Games", "SteamLibrary", "steamapps", "common", "Rust")
+                };
+
+                foreach (DriveInfo drive in DriveInfo.GetDrives())
+                {
+                    if (!drive.IsReady || drive.DriveType != DriveType.Fixed) continue;
+
+                    foreach (string subPath in commonSubPaths)
+                    {
+                        string candidate = Path.Combine(drive.RootDirectory.FullName, subPath);
+                        if (IsValidRustDirectory(candidate))
+                            return candidate;
+                    }
+                }
+            }
+            catch
+            {
+                // Fail silently and browse manually
+            }
+
+            return null;
+        }
+
+        private static string? GetSteamInstallPath()
+        {
+            using (RegistryKey? key64 = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Valve\Steam"))
+            {
+                if (key64?.GetValue("InstallPath") is string path64 && !string.IsNullOrWhiteSpace(path64))
+                    return path64.Trim();
+            }
+
+            using (RegistryKey? key32 = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Valve\Steam"))
+            {
+                if (key32?.GetValue("InstallPath") is string path32 && !string.IsNullOrWhiteSpace(path32))
+                    return path32.Trim();
+            }
+
+            using (RegistryKey? keyUser = Registry.CurrentUser.OpenSubKey(@"Software\Valve\Steam"))
+            {
+                if (keyUser?.GetValue("SteamPath") is string userPath && !string.IsNullOrWhiteSpace(userPath))
+                    return userPath.Replace('/', '\\').Trim();
+            }
+
+            return null;
         }
     }
 }

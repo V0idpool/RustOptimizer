@@ -45,12 +45,21 @@ namespace RustOptimizer.Helpers
 
             try
             {
-                Process.Start(new ProcessStartInfo
+                string steamUri = "steam://rungameid/252490";
+                if (Optimizer.IsAdministrator())
                 {
-                    FileName = rustExe,
-                    WorkingDirectory = rustPath,
-                    UseShellExecute = true
-                });
+                    Process.Start(new ProcessStartInfo("explorer.exe", $"\"{steamUri}\"")
+                    {
+                        UseShellExecute = true
+                    });
+                }
+                else
+                {
+                    Process.Start(new ProcessStartInfo(steamUri)
+                    {
+                        UseShellExecute = true
+                    });
+                }
             }
             catch (Exception ex)
             {

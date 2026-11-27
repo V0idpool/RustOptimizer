@@ -586,10 +586,7 @@ namespace RustOptimizer.Core
 
         public static void SetPriority(bool high)
         {
-            WantsHighPriority = high;
             ApplyIfeoPriority(high);
-            EnsureWatchdogState();
-            TriggerImmediateCheck();
         }
 
         public static void SetCpuAffinity(bool physicalOnly)
@@ -641,7 +638,7 @@ namespace RustOptimizer.Core
 
         private static void EnsureWatchdogState()
         {
-            bool needsMonitoring = WantsHighPriority || WantsPCoresOnly || WantsAutoPowerPlan || WantsThrottleBackgroundApps;
+            bool needsMonitoring = WantsPCoresOnly || WantsAutoPowerPlan || WantsThrottleBackgroundApps;
 
             if (needsMonitoring)
             {
@@ -681,8 +678,8 @@ namespace RustOptimizer.Core
                         {
                             try
                             {
-                                ApplyProcessPriority(p);
-                                ApplyProcessAffinity(p);
+                                if (WantsPCoresOnly)
+                                    ApplyProcessAffinity(p);
                             }
                             catch (System.ComponentModel.Win32Exception) { /* EAC blocks handle edits after init */ }
                             catch (InvalidOperationException) { }
@@ -703,16 +700,6 @@ namespace RustOptimizer.Core
                     ExceptionHandler.LogError(ex);
                 }
             }
-        }
-
-        private static void ApplyProcessPriority(Process p)
-        {
-            ProcessPriorityClass targetPriority = WantsHighPriority
-                ? ProcessPriorityClass.High
-                : ProcessPriorityClass.Normal;
-
-            if (p.PriorityClass != targetPriority)
-                p.PriorityClass = targetPriority;
         }
 
         private static void ApplyProcessAffinity(Process p)

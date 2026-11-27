@@ -1,4 +1,4 @@
-#pragma warning disable WFO1000
+﻿#pragma warning disable WFO1000
 
 using System;
 using System.Windows.Forms;
