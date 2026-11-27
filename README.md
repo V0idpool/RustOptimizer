@@ -1,4 +1,4 @@
-# RustOptimizer
+# Rust Optimizer
 
 <img width="999" height="514" alt="RustOptimizer" src="https://github.com/user-attachments/assets/83beac24-7023-4642-9e07-530a14b6aeb8" />
 
